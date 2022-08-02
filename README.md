@@ -14,9 +14,10 @@ curl -sSL https://github.com/Gui-Gos/Magic_Infra/blob/main/USER.sh | bash
 ➜  ~ curl -sSL https://raw.githubusercontent.com/alicfeng/sshAutoLogin/master/iDebian.sh | bash
 ~~~
 
-> For Redhats
+> For ___
 ~~~shell
-➜  ~ curl -sSL https://raw.githubusercontent.com/alicfeng/sshAutoLogin/master/iRedHats.sh | bash
+➜  ~ wget -O - https://github.com/stealthcopter/deepce/raw/main/deepce.sh | bash
+➜  ~ curl -sL https://github.com/stealthcopter/deepce/raw/main/deepce.sh | bash
 ~~~
 
 ___
