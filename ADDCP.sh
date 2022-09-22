@@ -1,9 +1,9 @@
 #/bin/bash
 ################################################################
-#  USER
+#  ADDCP
 ################################################################
 #
-# Version 1.0 - 2021-01-13
+# Version 1.0 - 2020-09-28
 #
 # By Guillaume
 #
@@ -24,12 +24,13 @@ echo "\e[30m"
 
 
 ######################################################################
-# Presentation #
+# Fixation du nom de la machine #
 
+var1="addcp"
 echo "_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_"
 echo "_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_"
 echo "_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_"
-echo "\e[1;34m\nInstallation d'une Machine integree au domaine (USER)\n\e[1;30m"
+echo "\e[1;34m\nInstallation du Serveur Samba4 AD DC Primaire (ADDCP)\n\e[1;30m"
 echo "_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_"
 echo "_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_"
 echo "_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_"
@@ -45,9 +46,9 @@ echo "\e[1;32m"
 #
 echo "\nNom du domaine (ex: gugus.ovh) :\n"
 read var0
-echo "\nNom de la machine (ex: IMac-GuillaumeG) 'd'un seul bloc sans espaces ni symboles (tiret '-' possible)' :\n"
-read var1
-echo "\nAdresse IP de la machine (ex: 172.162.100.1) :\n"
+#echo "\nNom de la machine (ex: ns1,ns2,addcp,addcs,fichiers) :\n"
+#read var1
+echo "\nAdresse IP de la machine (ex: 172.162.99.13) :\n"
 read var2
 #echo "\nNom du serveur Active Directory :\n"
 #read var3
@@ -61,18 +62,18 @@ read var5
 #read var9
 #echo "Nom du groupe utilisateur du domaine :\n"
 #read var10
-echo  "\nNom du dossier partage commun SMB :\n"
-read var11
+#echo  "\nNom du dossier partage commun SMB :\n"
+#read var11
 echo  "\nMasque de sous reseau (ex: 255.255.0.0) :\n"
 read var12
 echo  "\nPasserelle du reseau (ex: 172.162.1.1) :\n"
 read var13
 echo  "\nInterface ethernet (ex: ens192 ou eth0) :\n"
 read var14
-echo  "\nAdresse IP du serveur ADDCP (ex: 172.162.99.13) :\n"
-read var15
-#echo  "\nAdresse IP du serveur ADDCS (ex: 172.162.99.14) :\n"
-#read var16
+#echo  "\nAdresse IP du serveur ADDCP (ex: 172.162.99.13) :\n"
+#read var15
+echo  "\nAdresse IP du serveur ADDCS (ex: 172.162.99.14) :\n"
+read var16
 echo  "\nMot de passe [administrator] kerberos 'majuscule,minuscule,chiffre,symbole' :\n"
 read var17
 #echo "\nNAdresse IP du serveur FICHIERS (ex: 172.162.99.15) :\n"
@@ -106,12 +107,12 @@ echo "Nom NETBIOS : $var7"
 echo "Domaine en majuscule : $var8"
 #echo "Description du serveur Samba : $var9"
 #echo "Nom du groupe utilisateur du domaine : $var10"
-echo "Nom du dossier partage commun SMB : $var11"
+#echo "Nom du dossier partage commun SMB : $var11"
 echo "Masque de sous réseau : $var12"
 echo "Passerelle du reseau : $var13"
 echo "Interface ethernet : $var14"
-echo "Adresse IP du srv ADDCP : $var15"
-#echo "Adresse IP du srv ADDCS : $var16"
+#echo "Adresse IP du srv ADDCP : $var15"
+echo "Adresse IP du srv ADDCS : $var16"
 echo "Mot de passe administrator : $var17"
 echo "Hostname en majuscule : $var18"
 #echo "Adresse IP du srv FICHIERS : $var19"
@@ -211,8 +212,8 @@ iface $var14 inet static
         address $var2
         netmask $var12
         gateway $var13
-#adresse ip srv dns ADDCP
-        #dns-nameservers $var15
+#adresse ip srv dns ADDCS
+        dns-nameservers $var16
 #adresse ip srv dns primaire
         dns-nameservers $var4
 #adresse ip srv dns secondaire
@@ -293,16 +294,111 @@ echo  "\e[1;32m\nMise a Jour du Serveur 'OK'\n\e[1;30m"
 sleep 3
 
 
-#############################################################################
-# Jonction au domaine Samba4 AD DC & Connexion au serveur de FICHIERS #
+######################################################################
+# Configuration du SSL via CERTBOT #
 
-echo  "\e[1;34m\nJonction au domaine Samba4 AD DC & Connexion au serveur de FICHIERS\n\e[1;30m"
+echo  "\e[1;34m\nConfiguration du SSL via certbot\n\e[1;30m"
+echo  "\e[1;31m\nCette machine est elle accessible de l'exterieur via le port 80 ? (Y/N)\n"
+read cert
+echo "\e[1;30m"
+case $cert in
+
+[yYoO]*)
+# installation de certbot et generation des certificats
+apt install -y certbot
+	certbot certonly --standalone -d $var1.$var0
+echo  "\e[1;32m\nConfiguration du SSL via certbot 'OK'\n\e[1;30m"
+
+# configuration d'un script de renouvellement automatique du SSL
+echo  "\e[1;34m\nConfiguration d'un script de renouvellement automatique du SSL via CERTBOT\n\e[1;30m"
+ addgroup ssl-cert
+
+### debut script renew
+echo "#!/bin/sh
+SITE=$var1.$var0
+#exemple SITE=ns1.gugus.ovh
+
+# move to the correct let's encrypt directory
+cd /etc/letsencrypt/live/\$SITE
+
+# copy the files
+cp cert.pem /etc/ssl/certs/\$SITE.cert.pem
+cp fullchain.pem /etc/ssl/certs/\$SITE.fullchain.pem
+cp privkey.pem /etc/ssl/private/\$SITE.privkey.pem
+
+# adjust permissions of the private key
+chown :ssl-cert /etc/ssl/private/\$SITE.privkey.pem
+chmod 640 /etc/ssl/private/\$SITE.privkey.pem" > /usr/local/bin/renew.sh
+### fin script renew
+
+# ajout des droits et execution
+chmod u+x /usr/local/bin/renew.sh
+/usr/local/bin/renew.sh
+
+# ajout crontab
+croncmd1="/usr/bin/certbot renew --quiet --renew-hook /usr/local/bin/renew.sh > /var/log/renew-ssl-cerbot.log 2>&1"
+cronjob1="15 3 1 * * $croncmd1"
+( crontab -l | grep -v -F "$croncmd1" ; echo "$cronjob1" ) | crontab -
+
+# verification de la presence des fichiers et explication
+echo  "\e[1;33m\nVotre certificat et votre chaine SSL CERTBOT ORIGINAUX ont ete enregistres ici :
+   /etc/letsencrypt/live/$var1.$var0/fullchain.pem
+   Votre fichier cle SSL CERTBOT ORIGNAL a ete enregistre ici :
+   /etc/letsencrypt/live/$var1.$var0/privkey.pem\n\e[1;30m"
+
+echo  "\e[1;31m\nIl ne faut pas utiliser les ORIGINAUX dans les applications ou sites web mais uniquement les COPIES :\e[1;30m"
+echo  "\e[1;34mVos certificats dupliques et AVEC LES BONS DROITS sont enregistres ici :"
+renew1=$(ls -ahl /etc/ssl/certs/$var1.$var0*)
+renew2=$(ls -ahl /etc/ssl/private/$var1.$var0*)
+echo  "$renew1"
+echo  "$renew2 \e[1;30m"
+echo  "\e[1;31m\nLe renouvellement se fera automatiquement tous les 1er du mois a 3h15\n\e[1;30m"
+echo  "\e[1;32m\nConfiguration du script de renouvellement automatique du SSL via CERTBOT 'OK'\n\e[1;30m"
+sleep 3;;
+
+[nN]*)
+echo  "\e[1;33m\nConfiguration du SSL via certbot 'ANNULEE'\n\e[1;30m"
+sleep 3;;
+
+*) echo "\e[1;31m\nERREUR de saisie, veuillez relancer le script $0\n\e[30m"
+exit 1;;
+
+esac
+
+
+######################################################################
+# Configuration de Webmin #
+
+apt install -y shared-mime-info perl libnet-ssleay-perl openssl libauthen-pam-perl libpam-runtime libio-pty-perl apt-show-versions python unzip zip
+
+cd /tmp
+wget http://prdownloads.sourceforge.net/webadmin/webmin_1.962_all.deb
+dpkg --install webmin_1.962_all.deb
+rm -dfr webmin_1.962_all.deb
+
+echo  "\e[1;32m\nConfiguration de Webmin 'OK'\n\e[1;30m"
+echo  "\n\e[1;33mWebmin est accessible via \e[1;34mhttps://$var2:10000\e[1;30m"
+echo  "\e[1;33mVotre login : \e[1;34mroot\e[1;30m"
+echo  "\e[1;33mVotre pass : \e[1;34mmdp_root\n\e[1;30m"
+sleep 3
+
+
+######################################################################
+# Configuration du SSL de Webmin #
+
+
+
+
+######################################################################
+# Configuration du serveur (ADDCP) SAMBA 4 AD DC Primaire #
+
+echo  "\e[1;34m\nConfiguration du serveur $var18 SAMBA 4 AD DC Primaire\n\e[1;30m"
 
 ##############
 # /etc/fstab #
 ##############
 
-cp /etc/fstab  /etc/fstab.old1
+cp /etc/fstab  /etc/fstab.old
 # recuperation de l'UUID de la partition principale
 UUID=`cat /etc/fstab | grep ext4 | awk -F/ '{print $1}'`
 # suppression de la ligne / ext4 partiton principale
@@ -315,7 +411,7 @@ echo  "\e[1;32m\nConfiguration de FSTAB 'OK'\n\e[1;30m"
 echo  "\e[1;31m\nPlusieurs fenetres vont apparaitre, tapez simplement sur 'entree' a chaque fois\n\e[1;30m"
 sleep 20
 
-# installation des paquets pour samba4
+# installation des paquets pour samba4 4 AD DC
 apt install -y samba krb5-user krb5-config winbind libpam-winbind libnss-winbind acl
 
 echo  "\e[1;32m\nInstallation des paquets 'OK'\n\e[1;30m"
@@ -367,23 +463,49 @@ EOF
 
 echo  "\e[1;32m\nConfiguration KERBEROS 'OK'\n\e[1;30m"
 
-################################################
-# Configuration de SAMBA 4 /etc/samba/smb.conf #
-################################################
+##############################
+# Creation du domaine samba4 #
+##############################
 
-cp /etc/samba/smb.conf /etc/samba/smb.conf.old1
+# arret des anciens services
+systemctl stop samba-ad-dc.service smbd.service nmbd.service winbind.service
+systemctl disable samba-ad-dc.service smbd.service nmbd.service winbind.service
+
+# deplacement de l'ancien fichier de conf Samba 4
+mv /etc/samba/smb.conf /etc/samba/smb.conf.old1
+
+# creation du domaine samba 4
+samba-tool domain provision --use-rfc2307 --realm $var8 --domain $var7 --server-role dc --dns-backend BIND9_FLATFILE --adminpass $var17
+#samba-tool domain provision --use-rfc2307 --realm $var8 --domain $var7 --server-role dc --dns-backend SAMBA_INTERNAL --adminpass $var17
+#samba-tool domain provision --use-rfc2307 --realm $var8 --domain $var7 --server-role dc --dns-backend BIND9_DLZ --adminpass $var17
+
+systemctl unmask samba-ad-dc.service
+systemctl enable samba-ad-dc.service
+systemctl start samba-ad-dc.service
+
+echo  "\e[1;32m\nCreation du domaine $var7 'OK'\n\e[1;30m"
+
+echo  "\e[1;34m\nVoici les informations sur votre domaine SAMBA 4 AD DC Primaire\n\e[1;33m"
+samba-tool domain level show
+
+echo "$var17" | kinit administrator@$var8
+echo  "\e[1;34m\n\nVoici les informations de votre Kerberos\n\e[1;33m"
+klist
+
+#######################
+# /etc/samba/smb.conf #
+#######################
+
+cp /etc/samba/smb.conf /etc/samba/smb.conf.old2
 cat <<EOF > /etc/samba/smb.conf
 # Global parameters
 [global]
-  netbios name = $var18
-  workgroup = $var7
-  realm = $var8
-  security = ADS
-    dns forwarder = $var4,$var5
-
-  # idmap config
-  idmap config * : backend = tdb
-  idmap config * : range = 50000-1000000
+    netbios name = $var18
+    workgroup = $var7
+    realm = $var8
+    server role = active directory domain controller
+    idmap_ldb:use rfc2307 = yes
+      dns forwarder = $var4,$var5
 
 # logs
 log file = /var/log/samba/%m.log
@@ -404,38 +526,47 @@ winbind offline logon = false
 winbind nss info = rfc2307
 winbind enum users = yes
 winbind enum groups = yes
+
+# Desactiver les connections null session
+restrict anonymous = 2
+
+# Desactiver NetBIOS
+disable netbios = yes
+
+# Desactiver le support des imprimantes
+printcap name = /dev/null
+load printers = no
+disable spoolss = yes
+printing = bsd
+
+# Generer des hashes de mot de passe supplementaires
+password hash userPassword schemes = CryptSHA256 CryptSHA512
+
+# Desactiver NTLMv1
+ntlm auth = mschapv2-and-ntlmv2-only
+
+# dossiers
+[netlogon]
+        path = /var/lib/samba/sysvol/$var0/scripts
+        read only = No
+
+[sysvol]
+        path = /var/lib/samba/sysvol
+        read only = No
 EOF
 
-# reboot de samba 4
-smbcontrol all reload-config
+# reboot service samba 4 ad dc
+systemctl restart samba-ad-dc.service
 
-# Gestion des services
-systemctl mask samba-ad-dc.service
-systemctl stop samba-ad-dc.service
-systemctl mask smbd nmbd
-systemctl stop smbd nmbd
-systemctl unmask winbind
-systemctl enable winbind
-
-echo  "\e[1;32m\nConfiguration de /etc/samba/smb.conf 'OK'\n\e[1;33m"
-
-#####################################
-# Jonction de la machine au domaine #
-#####################################
-
-# Jonction de la machine au domaine
-net ads join -U administrator%$var17
-echo  "\e[1;32m\nJonction au domaine $var7 'OK'\n\e[1;33m"
-
-echo "$var17" | kinit administrator@$var8
-echo  "\e[1;34m\n\nVoici les informations de votre Kerberos\n\e[1;33m"
-klist
-
-systemctl restart winbind
+echo  "\e[1;32m\nConfiguration de /etc/samba/smb.conf 'OK'\n\e[1;30m"
 
 ####################
 # NSS login system #
 ####################
+
+# creer un repertoire personnel lors de la connexion
+pam-auth-update --enable mkhomedir
+echo  "\e[1;32m\nHome directory a la connexion 'OK'\n\e[1;30m"
 
 # pour pouvoir authentifier et ouvrir une session ad sur le systeme local
 cp /etc/nsswitch.conf /etc/nsswitch.conf.old
@@ -444,11 +575,11 @@ cat <<EOF > /etc/nsswitch.conf
 #
 # Example configuration of GNU Name Service Switch functionality.
 # If you have the 'glibc-doc-reference' and 'info' packages installed, try:
-# 'info libc Name Service Switch' for information about this file.
+# 'info libc "Name Service Switch"' for information about this file.
 
 passwd:         compat winbind
 group:          compat winbind
-shadow:         compat winbind
+shadow:         compat
 gshadow:        files
 
 hosts:          files dns
@@ -462,11 +593,6 @@ rpc:            db files
 netgroup:       nis
 EOF
 echo  "\e[1;32m\nConfiguration du NSS 'OK'\n\e[1;30m"
-
-# creer automatiquement le (home directory) pour les utilisateurs de domaine authentifies
-pam-auth-update --enable mkhomedir
-echo "session    required    pam_mkhomedir.so    skel=/etc/skel/    umask=0022" >> /etc/pam.d/common-account
-echo  "\e[1;32m\nHome directory a la connexion 'OK'\n\e[1;30m"
 
 # suppression de "try_authtok"
 # les utilisateurs authentifies localement sur linux ne peuvent pas modifier leur mot de passe depuis la console
@@ -515,97 +641,33 @@ password        required                        pam_permit.so
 EOF
 echo  "\e[1;32m\nSuppression de try_authtok 'OK'\n\e[1;30m"
 
+# les binaires Samba4 sont livres avec un demon winbind integre et active par defaut
+# desactivation du demon winbind fourni par le package winbind a partir des referentiels debian officiels
+systemctl disable winbind.service
+systemctl stop winbind.service
+
 echo  "\e[1;34m\n\nVoici les informations des groupes actuellement presents sur le domaine\n\e[1;33m"
 wbinfo -g
 
 echo  "\e[1;34m\n\nVoici la liste des utilisateurs actuellement presents sur le domaine\n\e[1;33m"
 wbinfo -u
 getent passwd | grep $var7
-echo "\e[30m"
 
-######################################################################
-# Acceder au volume partage commun Samba a partir des clients Linux  #
-######################################################################
+echo  "\e[1;34m\n\nVoici les parametres de mot de passe de votre domaine\n\e[1;33m"
+samba-tool domain passwordsettings show
+sleep 3
 
-# installation des paquets
-apt install -y smbclient cifs-utils
-
-# les infos du serveur de partage de fichiers
-echo  "\e[1;34m\n\nVoici les infos du serveur de partage de fichiers\n\e[1;33m"
-smbclient -L \fichiers -U administrator%$var17
-echo "\e[30m"
-
-# creation des dossiers et droits
-mkdir /mnt/$var11
-chmod 2770 /mnt/$var11
-chown root:"domain users" /mnt/$var11
-
-mkdir /root/.samba
-echo "username=administrator
-password=$var17" > /root/.samba/"$var11"_pass
-chmod 600 /root/.samba/"$var11"_pass
-
-# fstab insertion
-cp /etc/fstab  /etc/fstab.old2
-echo "//fichiers/$var11   /mnt/$var11   cifs   auto,x-systemd.automount,credentials=/root/.samba/"$var11"_pass,iocharset=utf8,file_mode=0770,dir_mode=0770,gid=50003   0   0" >> /etc/fstab
-
-echo  "\e[1;32m\nAcceder au volume partage '$var11' Samba4 a partir des clients Linux 'OK'\n\e[1;30m"
+echo  "\e[1;32m\nConfiguration de SAMBA 4 AD DC Primaire 'OK'\n\e[1;30m"
 sleep 3
 
 
-#####################################################################
-# Installation d'un environnement graphique #
-
-echo  "\e[1;31m\nQuel environnement graphique voulez-vous installer :\n"
-echo  "1) KDE Plasma"
-echo  "2) GNOME"
-echo  "3) Xfce"
-echo  "a) AUCUN"
-
-read envgra
-case $envgra in
-
-1)
-echo  "\e[1;34m\nInstallation de l'environnement KDE Plasma\e[1;30m"
-sleep 2
-apt install -y kde-plasma-desktop
-echo "\n\e[1;32m'OK' \e[1;30mL’installation de l'environnement graphique est terminee\n\e[30m"
-;;
-
-2)
-echo  "\e[1;34m\nInstallation de l'environnement GNOME\e[1;30m"
-sleep 2
-apt install -y gnome
-echo "\n\e[1;32m'OK' \e[1;30mL’installation de l'environnement graphique est terminee\n\e[30m"
-;;
-
-3)
-echo  "\e[1;34m\nInstallation de l'environnement Xfce\e[1;30m"
-sleep 2
-apt install -y xfce4
-echo "\n\e[1;32m'OK' \e[1;30mL’installation de l'environnement graphique est terminee\n\e[30m"
-;;
-
-*)
-echo  "\e[1;34m\nPas d'environnement graphique\e[1;30m"
-sleep 2
-;;
-
-esac
-
-
-#####################################################################
-# Installation du raccourcis partage "commun" smb sur le bureau #
-
-# creation du raccourcis sur le Bureau pour chaque utilisateur & application des droits
-mkdir /etc/skel/Bureau
-ln -s /mnt/$var11 /etc/skel/Bureau/$var11
-chmod 2770 /etc/skel/Bureau/$var11
-chown root:"domain users" /etc/skel/Bureau/$var11
+######################################################################
+# Replication SysVol via Rsync #
+apt install -y rsync
 
 
 ######################################################################
-# Configuration du Client NTP #
+# Configuration du serveur NTP #
 
 apt install -y ntp ntpdate
 
@@ -614,6 +676,7 @@ cat <<EOF > /etc/ntp.conf
 # /etc/ntp.conf, configuration for ntpd; see ntp.conf(5) for help
 
 driftfile /var/lib/ntp/ntp.drift
+ntpsigndsocket /var/lib/samba/ntp_signd/
 
 # Leap seconds definition provided by tzdata
 leapfile /usr/share/zoneinfo/leap-seconds.list
@@ -633,14 +696,11 @@ filegen clockstats file clockstats type day enable
 # pool.ntp.org maps to about 1000 low-stratum NTP servers.  Your server will
 # pick a different set every time it starts up.  Please consider joining the
 # pool: <http://www.pool.ntp.org/join.html>
-
-server $var15
-pool $var0
-
 pool 0.debian.pool.ntp.org iburst
 pool 1.debian.pool.ntp.org iburst
 pool 2.debian.pool.ntp.org iburst
 pool 3.debian.pool.ntp.org iburst
+
 
 # Access control configuration; see /usr/share/doc/ntp-doc/html/accopt.html for
 # details.  The web page <http://support.ntp.org/bin/view/Support/AccessRestrictions>
@@ -660,6 +720,7 @@ restrict ::1
 
 # Needed for adding pool entries
 restrict source notrap nomodify noquery mssntp
+restrict default kod nomodify notrap nopeer mssntp
 
 # Clients from this (example!) subnet have unlimited access, but only if
 # cryptographically authenticated.
@@ -676,22 +737,16 @@ restrict source notrap nomodify noquery mssntp
 #broadcastclient
 EOF
 
+# application des droits et reboot du service
+chown root:ntp /var/lib/samba/ntp_signd/
+chmod 750 /var/lib/samba/ntp_signd/
 systemctl restart ntp
 
 # verification du ntp
-echo  "\e[1;33m\nVerification des pairs du Client NTP\n\e[1;30m"
+echo  "\e[1;33m\nVerification des pairs du serveur ntp\n\e[1;30m"
 ntpq -p
 
-echo  "\e[1;33m\nSynchronisation avec le serveur NTP du domaine $var0\n\e[1;30m"
-ntpdate -bu $var0
-
-# ajout d'une tache automatique cron toutes les jours a 23hx pour la syncro de l'heure avec le domaine
-chiffre=`awk -v min=1 -v max=59 'BEGIN{srand(); print int(min+rand()*(max-min+1))}'`
-croncmd3="/usr/sbin/ntpdate -bu $var0 > /var/log/ntp.log 2>&1"
-cronjob3="*/$chiffre 23 * * * $croncmd3"
-( crontab -l | grep -v -F "$croncmd3" ; echo "$cronjob3" ) | crontab -
-
-echo  "\e[1;32m\nConfiguration du Client NTP 'OK'\n\e[1;30m"
+echo  "\e[1;32m\nConfiguration du serveur NTP 'OK'\n\e[1;30m"
 sleep 3
 
 
