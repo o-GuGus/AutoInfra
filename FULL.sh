@@ -46,21 +46,21 @@ printf " ██████╗ ██╗   ██╗██╗██╗     █�
 # check sudo or root perms #
 
 function RootorUser {
-	WhoIs=`pwd`
 	Name=`whoami`
-	if [ sudo -l | grep -c "may not run" -eq 1]; then
-		printf "\n${Blue}$Name ${Red}is not a sudoers account${ResetColor}\n"
-			if [ $Name = "root" ]; then
-				printf "\n${Blue}$Name ${Red}is a good account${ResetColor}\n"
-			else
-				printf "\n${Yellow}Please go to 'root' account to continue${ResetColor}\n"
-				su root && bash $0
-			fi
-	else
-		printf "\n${Green}This a sudoers account${ResetColor}\n"
+	sudo -l #1 not sudo #0 sudo 
+	if [ $? -gt 0 ]; then
+		printf "\n${Red}$Name is not a sudoers account${ResetColor}\n"
+		if [ $Name = "root" ]; then
+			printf "\n${Red}$Name is a good account${ResetColor}\n"
+		else
+			printf "\n${Yellow}Please type your 'root' account password to continue${ResetColor}\n"
+			su root && bash $0
+		fi
 	fi
+		printf "\n${Green}This a sudoers account${ResetColor}\n"
+}
 	
-
+	
 RootorUser
 
 
