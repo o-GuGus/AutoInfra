@@ -92,7 +92,7 @@ function RootorUser {
 			else
 				printf "${Green}'$Name' Is a sudoers account${ResetColor}\n"
                 printf "${Yellow}Please logged in on your root account now, type your 'root' password${ResetColor}\n"
-                if ! sudo -u root "$0";then
+                if ! sudo -u root "$0"; then
                 exit 1
                 fi
 			fi
