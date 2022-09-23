@@ -108,6 +108,9 @@ function RootorUser {
 # Choice menu for deployement #
 
 function ChoiceMenu {
+if [ $Name != "root" ]; then
+exit 0
+fi
 printf "${Yellow}Which server/user do you want to deploy:${ResetColor}\n"
 printf "${Yellow}1) ${Cyan}Name serveur one     (NS1)${ResetColor}\n"
 printf "${Yellow}2) ${Cyan}Name serveur two     (NS2)${ResetColor}\n"
