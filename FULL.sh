@@ -1,4 +1,4 @@
-#/bin/bash
+#!/bin/bash
 ################################################################
 #  Magic_infra
 ################################################################
@@ -87,14 +87,16 @@ function RootorUser {
 	printf "${Yellow}Please type your password now${ResetColor}\n"
 	if [ $Name != "root" ]; then
 			if ! sudo -l; then
-			printf "${Red}$Name Is not a sudoers account${ResetColor}\n"
+			printf "${Red}'$Name' Is not a sudoers account${ResetColor}\n"
 			printf "${Red}Please logged in on a root or admin account and restart the script $0 ${ResetColor}\n"
 			exit 1
 			else
-				printf "${Green}$Name Is a sudoers account${ResetColor}\n"
+				printf "${Green}'$Name' Is a sudoers account${ResetColor}\n"
+                printf "${Yellow}Please logged in on your root account now${ResetColor}\n"
+                sudo -u "$Name" "$0"
 			fi
 	else
-		printf "${Green}$Name Is a good account${ResetColor}\n"
+		printf "${Green}'$Name' Is a good account${ResetColor}\n"
 	fi
 }
 
