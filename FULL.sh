@@ -87,7 +87,7 @@ function RootorUser {
 	if [ $Name != "root" ]; then
 			if ! sudo -l; then
 			printf "${Red}'$Name' Is not a sudoers account${ResetColor}\n"
-			printf "${Red}Please logged in on a root or admin account and restart the script $0 ${ResetColor}\n"
+			printf "${Red}Please logged in on a root or admin account and restart the script "$0" ${ResetColor}\n"
 			exit 1
 			else
 				printf "${Green}'$Name' Is a sudoers account${ResetColor}\n"
