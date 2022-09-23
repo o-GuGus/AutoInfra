@@ -84,7 +84,6 @@ printf "${Cyan}For more information, please follow this link 'https://github.com
 function RootorUser {
 	Name=$(whoami)
 	printf "${Yellow}Hello '$Name' We will test if you have sudo or root permissions${ResetColor}\n"
-	printf "${Yellow}Please type your password now${ResetColor}\n"
 	if [ $Name != "root" ]; then
 			if ! sudo -l; then
 			printf "${Red}'$Name' Is not a sudoers account${ResetColor}\n"
@@ -92,8 +91,8 @@ function RootorUser {
 			exit 1
 			else
 				printf "${Green}'$Name' Is a sudoers account${ResetColor}\n"
-                printf "${Yellow}Please logged in on your root account now${ResetColor}\n"
-                sudo -u "$Name" "$0"
+                printf "${Yellow}Please logged in on your root account now, type your 'root' password${ResetColor}\n"
+                sudo -u root "$0"
 			fi
 	else
 		printf "${Green}'$Name' Is a good account${ResetColor}\n"
