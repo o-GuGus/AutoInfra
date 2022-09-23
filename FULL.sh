@@ -48,7 +48,7 @@ printf "██████  ██    ██      ██████  ██    
 ██   ██  ██  ██      ██       ██    ██ ██ ██       ██    ██ ██      
 ██████    ████       ██   ███ ██    ██ ██ ██   ███ ██    ██ ███████ 
 ██   ██    ██        ██    ██ ██    ██ ██ ██    ██ ██    ██      ██ 
-██████     ██         ██████   ██████  ██  ██████   ██████  ███████ \n\n"
+██████     ██         ██████   ██████  ██  ██████   ██████  ███████ \n\n\n"
 }
 
 
@@ -82,20 +82,20 @@ printf "${Cyan}For more information, please follow this link 'https://github.com
 # check sudo or root perms #
 
 function RootorUser {
-    Name=$(whoami)
-    printf "${Yellow}Hello '$Name' We will test if you have sudo permissions${ResetColor}\n"
-    printf "${Yellow}Please type your password now${ResetColor}\n"
-	sudo -l #1 not sudo #0 sudo 
-	if [ $? -gt 0 ]; then
-		printf "${Red}$Name Is not a sudoers account${ResetColor}\n"
-		if [ $Name = "root" ]; then
-			printf "${Green}$Name Is a good account${ResetColor}\n"
-		else
-			printf "${Yellow}Please type your 'root' account password to continue${ResetColor}\n"
-			su root && bash $0
-		fi
+	Name=$(whoami)
+	printf "${Yellow}Hello '$Name' We will test if you have sudo or root permissions${ResetColor}\n"
+	printf "${Yellow}Please type your password now${ResetColor}\n"
+	if [ $Name != "root" ]; then
+			if ! sudo -l; then
+			printf "${Red}$Name Is not a sudoers account${ResetColor}\n"
+			printf "${Red}Please logged in on a root or admin account and restart the script $0 ${ResetColor}\n"
+			exit 1
+			else
+				printf "${Green}$Name Is a sudoers account${ResetColor}\n"
+			fi
+	else
+		printf "${Green}$Name Is a good account${ResetColor}\n"
 	fi
-		printf "${Green}This a sudoers account${ResetColor}\n"
 }
 
 
