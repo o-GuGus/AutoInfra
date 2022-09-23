@@ -99,6 +99,10 @@ function RootorUser {
 	else
 		printf "${Green}'$Name' Is a good account${ResetColor}\n"
 	fi
+# if sudo -u root "$0" is launched, this condition exiting properly the first script lauched by user
+if [ $Name != "root" ]; then
+exit 0
+fi
 }
 
 
@@ -108,9 +112,6 @@ function RootorUser {
 # Choice menu for deployement #
 
 function ChoiceMenu {
-if [ $Name != "root" ]; then
-exit 0
-fi
 printf "${Yellow}Which server/user do you want to deploy:${ResetColor}\n"
 printf "${Yellow}1) ${Cyan}Name serveur one     (NS1)${ResetColor}\n"
 printf "${Yellow}2) ${Cyan}Name serveur two     (NS2)${ResetColor}\n"
