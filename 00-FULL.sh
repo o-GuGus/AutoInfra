@@ -60,17 +60,17 @@ printf "${Cyan}You must have fixed the IP adress of machines before continuing${
 
 printf "${Cyan}Here is an example of functional infrastructure:${ResetColor}\n"
 printf "${Cyan}#######################################################
-> Name serveur one		> NS1 		> 192.168.1.201
-> Name serveur two		> NS2 		> 192.168.1.202
-> Primary AD server     > ADDCP 	> 192.168.1.203
-> Secondary AD server	> ADDCS 	> 192.168.1.204
-> File server		    > FILE 	    > 192.168.1.205
+> Name serveur one	> NS1		> 192.168.1.201
+> Name serveur two	> NS2		> 192.168.1.202
+> Primary AD server	> ADDCP		> 192.168.1.203
+> Secondary AD server	> ADDCS		> 192.168.1.204
+> File server		> FILE		> 192.168.1.205
 
-> User machine 1		> USER1 	> 192.168.1.101
-> User machine 2		> USER2 	> 192.168.1.102
+> User machine 1	> USER1		> 192.168.1.101
+> User machine 2	> USER2		> 192.168.1.102
 
-> Subnet Mask network   > MASK  	> 255.255.255.0 /24
-> Gateway of router	    > GATEWAY 	> 192.168.1.1
+> Subnet Mask network	> MASK		> 255.255.255.0 /24
+> Gateway of router	> GATEWAY	> 192.168.1.1
 #######################################################${ResetColor}\n\n"
 
 printf "${Cyan}For more information, please follow this link 'https://github.com/Gui-Gos/Magic_Infra/blob/402c45de9917a9185a97191149da37554d6b4b8e/README.md'${ResetColor}\n\n"
@@ -125,8 +125,8 @@ read choice
 case $choice in
 
 1) # Name serveur one     (NS1)
-GetDATA
-FixNAME
+var1="ns1"; printf "${Green}Installation of ${Purple}> Name serveur one (NS1) < ${Green}is starting ${ResetColor}\n\n" # FixNAME 
+SetDATA
 ConfSHORTS
 ConfPATH
 ConfSSH
@@ -143,8 +143,8 @@ GoReboot
 ;;
 
 2) # Name serveur two     (NS2)
-GetDATA
-FixNAME
+var1="ns2"; printf "${Green}Installation of ${Purple}> Name serveur two (NS2) < ${Green}is starting ${ResetColor}\n\n" # FixNAME 
+SetDATA
 ConfSHORTS
 ConfPATH
 ConfSSH
@@ -161,8 +161,8 @@ GoReboot
 ;;
 
 3) # Primary AD server    (ADDCP)
-GetDATA
-FixNAME
+var1="addcp"; printf "${Green}Installation of ${Purple}> Primary AD server (ADDCP) < ${Green}is starting ${ResetColor}\n\n" # FixNAME 
+SetDATA
 ConfSHORTS
 ConfPATH
 ConfSSH
@@ -181,8 +181,8 @@ GoReboot
 
 
 4) # Secondary AD server  (ADDCS)
-GetDATA
-FixNAME
+var1="addcs"; printf "${Green}Installation of ${Purple}> Secondary AD server (ADDCS) < ${Green}is starting ${ResetColor}\n\n" # FixNAME 
+SetDATA
 ConfSHORTS
 ConfPATH
 ConfSSH
@@ -200,8 +200,8 @@ GoReboot
 ;;
 
 5) # File server          (FILE)
-GetDATA
-FixNAME
+var1="file"; printf "${Green}Installation of ${Purple}> File server (FILE) < ${Green}is starting ${ResetColor}\n\n" # FixNAME 
+SetDATA
 ConfSHORTS
 ConfPATH
 ConfSSH
@@ -219,8 +219,8 @@ GoReboot
 ;;
 
 6) # User machine         (USER)
-GetDATA
-FixNAME
+printf "${Red}Name of the machine (ex: GuiGos-Desktop) in a single block without spaces or symbols (dash '-' possible):${ResetColor}\n"; read var1 # FixNAME
+SetDATA
 ConfSHORTS
 ConfPATH
 ConfSSH
@@ -249,6 +249,29 @@ exit 1
 ;;
 esac
 }
+
+
+
+######################################################################
+# Questions #
+
+function SetDATA {
+
+printf "${Red}Please type answers in lowercase${ResetColor}\n\n"
+
+printf "${Red}Domain name (ex: parlote.fr):${ResetColor}\n"
+read var0
+
+printf "${Red}Machine IP address (ex: 192.168.1.201):${ResetColor}\n"
+read var2
+
+if [ $var1 = "ns1" ] || [ $var1 = "ns2" ]; then
+printf "${Red}Active Directory server name:${ResetColor}\n"
+read var3
+fi
+
+}
+
 
 
 
