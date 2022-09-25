@@ -219,7 +219,18 @@ GoReboot
 ;;
 
 6) # User machine         (USER)
-printf "${Red}Name of the machine (ex: GuiGos-Desktop) in a single block without spaces or symbols (dash '-' possible):${ResetColor}\n"; read var1 # FixNAME
+printf "${Purple}Name of the machine (ex: GuiGos123) in a single block without spaces or symbols:${ResetColor}\n"
+read var1 # FixNAME
+# Check the input value contains the alphabet and number only
+valid='[:alnum:]'
+while [[ "$var1" =~ [^$valid] ]]; do
+	printf "${Red}Enter a machine Name with contains alphabet and number only:${ResetColor}\n"
+	read var1 # FixNAME
+	done
+# set definitive Name of machine
+var1="user-$var1"
+printf "${Green}Your machine Name is ${Purple}$var1 ${ResetColor}\n\n"
+#
 SetDATA
 ConfSHORTS
 ConfPATH
@@ -265,11 +276,114 @@ read var0
 printf "${Red}Machine IP address (ex: 192.168.1.201):${ResetColor}\n"
 read var2
 
-if [ $var1 = "ns1" ] || [ $var1 = "ns2" ]; then
-printf "${Red}Active Directory server name:${ResetColor}\n"
-read var3
+#printf "${Red}Active Directory server name:${ResetColor}\n"
+#read var3
+
+if [ $var1 = "ns2" ] || [ $var1 = "addcp" ] || [ $var1 = "addcs" ] || [ $var1 = "file" ] || [[ "$var1" =~ ^user-[$valid] ]]; then
+printf "${Red}Primary DNS server (NS1) IP address (ex: 192.168.1.201):${ResetColor}\n"
+read var4
 fi
 
+if [ $var1 = "ns1" ] || [ $var1 = "addcp" ] || [ $var1 = "addcs" ] || [ $var1 = "file" ] || [[ "$var1" =~ ^user-[$valid] ]]; then
+printf "${Red}Secondary DNS server (NS2) IP address (ex: 192.168.1.202):${ResetColor}\n"
+read var5
+fi
+
+#printf "${Red}Domain admin login:${ResetColor}\n"
+#read var6
+
+# netbios domain name #
+var7=$(echo "$var0" |cut -d. -f 1 | tr "[:lower:]" "[:upper:]")
+
+# uppercase domain name #
+var8=$(echo "$var0" | tr "[:lower:]" "[:upper:]")
+
+#printf "${Red}Samba server description:${ResetColor}\n"
+#read var9
+
+#printf "${Red}Domain user group name:${ResetColor}\n"
+#read var10
+
+if [ $var1 = "file" ] || [[ "$var1" =~ ^user-[$valid] ]]; then
+printf "${Red}SMB common share folder name:${ResetColor}\n"
+read var11
+fi
+
+printf "${Red}Subnet mask (ex: 255.255.255.0):${ResetColor}\n"
+read var12
+
+printf "${Red}Network gateway (ex: 192.168.1.1):${ResetColor}\n"
+read var13
+
+printf "${Red}Ethernet interface (ex: eth0 or ens192):${ResetColor}\n"
+read var14
+
+if [ $var1 = "ns1" ] || [ $var1 = "ns2" ] || [ $var1 = "addcs" ] || [ $var1 = "file" ] || [[ "$var1" =~ ^user-[$valid] ]]; then
+printf "${Red}Primary AD server (ADDCP) IP address (ex: 192.168.1.203):${ResetColor}\n"
+read var15
+fi
+
+if [ $var1 = "ns1" ] || [ $var1 = "ns2" ] || [ $var1 = "addcp" ]; then
+printf "${Red}Secondary AD server (ADDCS) IP address (ex: 192.168.1.204):${ResetColor}\n"
+read var16
+fi
+
+if [ $var1 = "addcp" ] || [ $var1 = "addcs" ] || [ $var1 = "file" ] || [[ "$var1" =~ ^user-[$valid] ]]; then
+printf "${Red}Password [administrator] kerberos 'uppercase, lowercase, number, symbol':${ResetColor}\n"
+read var17
+fi
+
+# uppercase hostname #
+var18=$(echo "$var1" | tr "[:lower:]" "[:upper:]")
+
+if [ $var1 = "ns1" ] || [ $var1 = "ns2" ]; then
+printf "${Red}IP address of the FILE server (ex: 192.168.1.205):${ResetColor}\n"
+read var19
+fi
+
+if [ $var1 = "addcs" ] || [ $var1 = "file" ]; then
+printf "${Red}Password [root] for server 'ADDCP':${ResetColor}\n"
+read var20
+fi
+
+# Print all data for verification #
+printf "\n${Yellow}Please check the following informations:${ResetColor}\n"
+printf "${Yellow}Domain name:${Green} $var0 ${ResetColor}\n"
+printf "${Yellow}Machine name:${Green} $var1 ${ResetColor}\n"
+printf "${Yellow}@IP:${Green} $var2 ${ResetColor}\n"
+#printf "${Yellow}AD server name:${Green} $var3 ${ResetColor}\n"
+printf "${Yellow}@Primary DNS IP:${Green} $var4 ${ResetColor}\n"
+printf "${Yellow}@Secondary DNS IP:${Green} $var5 ${ResetColor}\n"
+#printf "${Yellow}Domain admin login:${Green} $var6 ${ResetColor}\n"
+printf "${Yellow}NETBIOS name:${Green} $var7 ${ResetColor}\n"
+printf "${Yellow}Domain uppercase:${Green} $var8 ${ResetColor}\n"
+#printf "${Yellow}Samba server description:${Green} $var9 ${ResetColor}\n"
+#printf "${Yellow}Domain user group name:${Green} $var10 ${ResetColor}\n"
+printf "${Yellow}SMB common share folder name:${Green} $var11 ${ResetColor}\n"
+printf "${Yellow}Subnet mask:${Green} $var12 ${ResetColor}\n"
+printf "${Yellow}Network Gateway:${Green} $var13 ${ResetColor}\n"
+printf "${Yellow}Ethernet interface:${Green} $var14 ${ResetColor}\n"
+printf "${Yellow}ADDCP srv IP address:${Green} $var15 ${ResetColor}\n"
+printf "${Yellow}ADDCS srv IP address:${Green} $var16 ${ResetColor}\n"
+printf "${Yellow}Administrator password:${Green} $var17 ${ResetColor}\n"
+printf "${Yellow}Hostname uppercase:${Green} $var18 ${ResetColor}\n"
+printf "${Yellow}File srv IP address:${Green} $var19 ${ResetColor}\n"
+printf "${Yellow}ADDCP root password:${Green} $var20 ${ResetColor}\n"
+
+# Informations is correct ?! #
+printf "\n${Yellow}Informations is correct ?! (Y/N)${ResetColor}\n"
+read info
+
+if [[ "$info" =~ ^[yYoO] ]]; then
+	printf "\n${Green}'OK'${Blue} Installation starts in 3 seconds ${ResetColor}\n"
+	sleep 3
+elif [[ "$info" =~ ^[nN] ]]; then
+	printf "\n${Red}'OK' Go to restart the script${Purple} '$0' ${ResetColor}\n"
+	./"$0"
+		else
+		printf "\n${Red}'INPUT ERROR' Please restart the script${Purple} '$0' ${ResetColor}\n"
+		exit 1
+fi
 }
 
 
