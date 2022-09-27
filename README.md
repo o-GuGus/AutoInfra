@@ -14,7 +14,7 @@ curl -sSL https://github.com/Gui-Gos/Magic_Infra/blob/main/USER.sh | bash
 ➜  ~ curl -sSL https://raw.githubusercontent.com/alicfeng/sshAutoLogin/master/iDebian.sh | bash
 ~~~
 
-> For ___
+> For 123123
 ~~~shell
 ➜  ~ wget -O - https://github.com/stealthcopter/deepce/raw/main/deepce.sh | bash
 ➜  ~ curl -sL https://github.com/stealthcopter/deepce/raw/main/deepce.sh | bash
