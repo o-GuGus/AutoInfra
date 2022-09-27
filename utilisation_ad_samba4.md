@@ -55,6 +55,7 @@ samba-tool group listmembers "your_domain group"
 ~~~shell
 samba-tool group addmembers your_domain_group your_domain_user
 samba-tool group remove members your_domain_group your_domain_user
+~~~
 
 > 12. Pour vérifier les paramètres de mot de passe de votre domaine samba, utilisez la commande ci-dessous:
 ~~~shell
