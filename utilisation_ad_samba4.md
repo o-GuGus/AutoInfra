@@ -1,3 +1,6 @@
+# utilisation ad samba4
+
+
 > 1. Afin de créer un utilisateur sur AD, utilisez la commande suivante:
 ~~~shell
 samba-tool user create your_domain_user
