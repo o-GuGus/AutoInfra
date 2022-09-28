@@ -18,7 +18,7 @@ ADDCS
 
 # Configuration de Webmin #
 
-# Configuration SAMBA 4 AD DC Primaire #
+# Configuration SAMBA 4 AD DC secondaire #
 - fstab
 - krb5.conf
 - Jonction au domaine Samba4 en tant que controleur de domaine secondaire
