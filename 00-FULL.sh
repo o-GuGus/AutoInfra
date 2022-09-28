@@ -137,7 +137,7 @@ ConfSOURCES
 GoUPDATES
 ConfSSL
 ConfWEBMIN
-ConfBIND9Primary
+ConfBIND9
 ConfNTPClient
 GoReboot
 ;;
@@ -155,7 +155,7 @@ ConfSOURCES
 GoUPDATES
 ConfSSL
 ConfWEBMIN
-ConfBIND9Secondary
+ConfBIND9
 ConfNTPClient
 GoReboot
 ;;
@@ -371,6 +371,29 @@ printf "${Yellow}Administrator password:${Green} $var17 ${ResetColor}\n"
 printf "${Yellow}Hostname uppercase:${Green} $var18 ${ResetColor}\n"
 printf "${Yellow}File srv IP address:${Green} $var19 ${ResetColor}\n"
 printf "${Yellow}ADDCP root password:${Green} $var20 ${ResetColor}\n"
+
+# export all variables for functions
+export $var0
+export $var1
+export $var2
+export $var3
+export $var4
+export $var5
+export $var6
+export $var7
+export $var8
+export $var9
+export $var10
+export $var11
+export $var12
+export $var13
+export $var14
+export $var15
+export $var16
+export $var17
+export $var18
+export $var19
+export $var20
 
 # Informations is correct ?! #
 printf "\n${Yellow}Informations is correct ?! (Y/N)${ResetColor}\n"
@@ -680,6 +703,220 @@ printf "${Yellow}Webmin is accessible through ${Purple}https://"$var2":10000 ${R
 printf "${Yellow}Your login name : ${Purple}"$USER" ${ResetColor}\n"
 sleep 3
 }
+
+
+
+######################################################################
+# Configuration de BIND9 #
+
+
+##########################
+# Configuration de BIND9 #
+#     Config pour NS1    #
+##########################
+
+
+function ConfBIND9 {
+
+if [ "$var1" = "ns1" ]; then
+ServerIP="$var5"
+fi
+
+if [ "$var1" = "ns2" ]; then
+ServerIP="$var4"
+fi
+
+apt install -y bind9 bind9utils bind9-doc
+systemctl enable bind9
+systemctl start bind9
+
+
+##### /etc/bind/named.conf #####
+cp /etc/bind/named.conf /etc/bind/named.conf.old
+cat <<EOF > /etc/bind/named.conf
+// This is the primary configuration file for the BIND DNS server named.
+//
+// Please read /usr/share/doc/bind9/README.Debian.gz for information on the
+// structure of BIND configuration files in Debian, *BEFORE* you customize
+// this configuration file.
+//
+// If you are just adding zones, please do that in /etc/bind/named.conf.local
+
+include "/etc/bind/named.conf.options";
+include "/etc/bind/named.conf.local";
+include "/etc/bind/named.conf.default-zones";
+server $ServerIP {
+        };
+EOF
+##### /etc/bind/named.conf #####
+
+
+##### /etc/bind/named.conf.options #####
+cp /etc/bind/named.conf.options /etc/bind/named.conf.options.old
+cat <<EOF > /etc/bind/named.conf.options
+options {
+        directory "/var/cache/bind";
+
+        // If there is a firewall between you and nameservers you want
+        // to talk to, you may need to fix the firewall to allow multiple
+        // ports to talk.  See http://www.kb.cert.org/vuls/id/800113
+
+        // If your ISP provided one or more IP addresses for stable
+        // nameservers, you probably want to use them as forwarders.
+        // Uncomment the following block, and insert the addresses replacing
+        // the all-0's placeholder.
+
+        // forwarders {
+        //      0.0.0.0;
+        // };
+
+        //========================================================================
+        // If BIND logs error messages about the root key being expired,
+        // you will need to update your keys.  See https://www.isc.org/bind-keys
+        //========================================================================
+        dnssec-validation auto;
+
+        listen-on-v6 { any; };
+        forwarders {
+                $var13;
+                8.8.8.8;
+                };
+};
+EOF
+##### /etc/bind/named.conf.options #####
+
+
+##### /etc/bind/named.conf.local #####
+##### cut de l'ip du srv aux 3 premiers blocs, exemple 192.168.0
+ipcut=`echo $var2 |cut -d. -f 1,2,3`
+##### retournement du cut de l'ip du srv, exemple 0.168.192
+ipcutrev=`echo $var2 | awk -F. '{print $3"."$2"."$1}'`
+#########
+cp /etc/bind/named.conf.local /etc/bind/named.conf.local.old
+cat <<EOF > /etc/bind/named.conf.local
+//
+// Do any local configuration here
+//
+
+// Consider adding the 1918 zones here, if they are not used in your
+// organization
+//include "/etc/bind/zones.rfc1918";
+
+zone "$var0" {
+        type master;
+        file "/var/lib/bind/$var0.hosts";
+        };
+zone "$ipcutrev.in-addr.arpa" {
+        type master;
+        file "/var/lib/bind/$ipcut.rev";
+        };
+EOF
+##### /etc/bind/named.conf.local #####
+
+
+##### /var/lib/bind/$var0.hosts #####
+cat <<EOF > /var/lib/bind/$var0.hosts
+\$ttl 38400
+$var0.      IN      SOA     $var1.$var0. admin.$var0. (
+                        1595498695   ; serial
+                        10800        ; refresh
+                        3600         ; retry
+                        604800       ; expiry
+                        38400 )      ; minimum
+;
+; global
+;
+$var0.           IN      NS     addcp.$var0.
+$var0.           IN      A      $var15
+                 IN      NS     addcp
+                 IN      A      $var15
+addcp             IN      A      $var15
+gc._msdcs        IN      A      $var15
+;
+; other srv
+;
+ns1.$var0.          IN      A     $var4
+ns2.$var0.          IN      A     $var5
+addcp.$var0.         IN      A     $var15
+addcs.$var0.          IN      A     $var16
+fichiers.$var0.          IN      A     $var19
+;
+; global catalog servers
+;
+_gc._tcp                                                IN SRV 0 100 3268       addcp
+_gc._tcp.Default-First-Site-Name._sites                 IN SRV 0 100 3268       addcp
+_ldap._tcp.gc._msdcs                                    IN SRV 0 100 3268       addcp
+_ldap._tcp.Default-First-Site-Name._sites.gc._msdcs     IN SRV 0 100 3268       addcp
+;
+; ldap servers
+;
+_ldap._tcp                                              IN SRV 0 100 389     addcp
+_ldap._tcp.dc._msdcs                                    IN SRV 0 100 389     addcp
+_ldap._tcp.pdc._msdcs                                   IN SRV 0 100 389     addcp
+_ldap._tcp.Default-First-Site-Name._sites               IN SRV 0 100 389     addcp
+_ldap._tcp.Default-First-Site-Name._sites.dc._msdcs     IN SRV 0 100 389     addcp
+;
+; krb5 servers
+;
+_kerberos._tcp                                              IN SRV 0 100 88     addcp
+_kerberos._tcp.dc._msdcs                                    IN SRV 0 100 88     addcp
+_kerberos._tcp.Default-First-Site-Name._sites               IN SRV 0 100 88     addcp
+_kerberos._tcp.Default-First-Site-Name._sites.dc._msdcs     IN SRV 0 100 88     addcp
+_kerberos._udp                                              IN SRV 0 100 88     addcp
+;
+; MIT kpasswd likes to lookup this name on password change
+;
+_kerberos-master._tcp        IN SRV 0 100 88     addcp
+_kerberos-master._udp        IN SRV 0 100 88     addcp
+;
+; kpasswd
+;
+_kpasswd._tcp           IN SRV 0 100 464     addcp
+_kpasswd._udp           IN SRV 0 100 464     addcp
+;
+; heimdal 'find realm for host' hack
+;
+_kerberos               IN TXT     $var8
+;
+EOF
+##### /var/lib/bind/$var0.hosts #####
+
+
+##### /var/lib/bind/$ipcut.rev #####
+##### retournement de l'ip du dns primaire
+ipns1rev=`echo $var4 | awk -F. '{print $4"."$3"."$2"."$1}'`
+##### retournement de l'ip du dns secondaire
+ipns2rev=`echo $var5 | awk -F. '{print $4"."$3"."$2"."$1}'`
+##### retournement de l'ip du srv addcp
+ipaddcprev=`echo $var15 | awk -F. '{print $4"."$3"."$2"."$1}'`
+##### retournement de l'ip du srv addcs
+ipaddcsrev=`echo $var16 | awk -F. '{print $4"."$3"."$2"."$1}'`
+##### retournement de l'ip du srv fichiers
+ipfichiersrev=`echo $var19 | awk -F. '{print $4"."$3"."$2"."$1}'`
+
+cat <<EOF > /var/lib/bind/$ipcut.rev
+\$ttl 38400
+$ipcutrev.in-addr.arpa.        IN      SOA     $var1.$var0. admin.$var0. (
+                        1596472349
+                        10800
+                        3600
+                        604800
+                        38400 )
+$ipcutrev.in-addr.arpa.      IN      NS      addcp.$var0.
+$ipaddcprev.in-addr.arpa.     IN      PTR     addcp.$var0.
+$ipns1rev.in-addr.arpa.      IN      PTR     ns1.$var0.
+$ipns2rev.in-addr.arpa.      IN      PTR     ns2.$var0.
+$ipaddcsrev.in-addr.arpa.      IN      PTR     addcs.$var0.
+$ipfichiersrev.in-addr.arpa.      IN      PTR     fichiers.$var0.
+EOF
+##### /var/lib/bind/$ipcut.rev #####
+
+systemctl restart bind9
+
+echo  "\e[1;32m\nConfiguration de BIND9 'OK'\n\e[1;30m"
+sleep 3
+}
+
 
 
 ################################################################
