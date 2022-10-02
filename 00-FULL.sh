@@ -400,14 +400,14 @@ printf "\n${Yellow}Informations is correct ?! (Y/N)${ResetColor}\n"
 read info
 
 if [[ "$info" =~ ^[yYoO] ]]; then
-	printf "\n${Green}'OK'${Blue} Installation starts in 3 seconds ${ResetColor}\n"
+	printf "\n${Green}'OK' ${Blue}Installation starts in 3 seconds ${ResetColor}\n"
 	sleep 3
 elif [[ "$info" =~ ^[nN] ]]; then
 	printf "\n${Red}'OK' Go to restart the script${Purple} '$0' ${ResetColor}\n"
 	./"$0"
 		else
-		printf "\n${Red}'INPUT ERROR' Please restart the script${Purple} '$0' ${ResetColor}\n"
-		exit 1
+                printf "\n${Red}'INPUT ERROR' Go to restart the script${Purple} '$0' ${ResetColor}\n"
+	        ./"$0"
 fi
 }
 
@@ -605,59 +605,58 @@ sleep 3
 
 function ConfSSL {
 
-echo  "\e[1;34m\nConfiguration du SSL via certbot\n\e[1;30m"
-echo  "\e[1;31m\nCette machine est elle accessible de l'exterieur via le port 80 ? (Y/N)\n"
-read cert
-echo "\e[1;30m"
-case $cert in
+printf "${Yellow}Configuring SSL auto renew for Webmin through CERTBOT${ResetColor}\n"
+printf "${Red}Is this machine accessible from the outside via port 80? (Y/N)${ResetColor}\n"
 
-[yYoO]*)
-# installation de certbot et generation des certificats
+read -r cert
+if [[ "$cert" =~ ^[yYoO] ]]; then
+printf "\n${Green}'OK' ${Blue}Installation starts in 3 seconds ${ResetColor}\n"
+
+# installation of certbot and generation of certificates
 apt install -y certbot
-	certbot certonly --standalone -d $var1.$var0
-echo  "\e[1;32m\nConfiguration du SSL via certbot 'OK'\n\e[1;30m"
+certbot certonly --standalone -d "$var1"."$var0"
+printf "${Cyan}Certbot installed and certificate generated${Green}'OK' ${ResetColor}\n"
 
-# configuration d'un script de renouvellement automatique du SSL
-echo  "\e[1;34m\nConfiguration d'un script de renouvellement automatique du SSL via CERTBOT\n\e[1;30m"
- addgroup ssl-cert
+# add grp for automatic SSL renewal script
+addgroup ssl-cert
 
-###
-FullHostName="$var1.$var0"
-### debut script renew
-cat <<EOF > /tmp/renew.sh
+# configure an automatic SSL renewal script
+### start of renew script
+cat <<EOF > /usr/local/bin/renew.sh
 #!/bin/bash
 ###
-# Automatic SSL renewal script via CERTBOT for $FullHostName
+# Automatic SSL renewal script via CERTBOT for "$var1"."$var0"
 ###
 
 # move to the correct let's encrypt directory
-cd /etc/letsencrypt/live/$FullHostName
+cd /etc/letsencrypt/live/"$var1"."$var0"
 
 # copy the files
-cp cert.pem /etc/ssl/certs/$FullHostName.cert.pem
-cp fullchain.pem /etc/ssl/certs/$FullHostName.fullchain.pem
-cp privkey.pem /etc/ssl/private/$FullHostName.privkey.pem
+cp cert.pem /etc/ssl/certs/"$var1"."$var0".cert.pem
+cp fullchain.pem /etc/ssl/certs/"$var1"."$var0".fullchain.pem
+cp privkey.pem /etc/ssl/private/"$var1"."$var0".privkey.pem
 
 # adjust permissions of the private key
-chown :ssl-cert /etc/ssl/private/$FullHostName.privkey.pem
-chmod 640 /etc/ssl/private/$FullHostName.privkey.pem
+chown :ssl-cert /etc/ssl/private/"$var1"."$var0".privkey.pem
+chmod 640 /etc/ssl/private/"$var1"."$var0".privkey.pem
 EOF
-### fin script renew
+### end of renew script
 
-# ajout des droits et execution
+# adding rights and 1er execution
 chmod u+x /usr/local/bin/renew.sh
 /usr/local/bin/renew.sh
 
-# ajout crontab
+# add crontab variables
 croncmd1="/usr/bin/certbot renew --quiet --renew-hook /usr/local/bin/renew.sh > /var/log/renew-ssl-cerbot.log 2>&1"
 cronjob1="15 3 1 * * $croncmd1"
+# add crontab
 ( crontab -l | grep -v -F "$croncmd1" ; echo "$cronjob1" ) | crontab -
 
-# verification de la presence des fichiers et explication
-echo  "\e[1;33m\nVotre certificat et votre chaine SSL CERTBOT ORIGINAUX ont ete enregistres ici :
-   /etc/letsencrypt/live/$var1.$var0/fullchain.pem
-   Votre fichier cle SSL CERTBOT ORIGNAL a ete enregistre ici :
-   /etc/letsencrypt/live/$var1.$var0/privkey.pem\n\e[1;30m"
+# verification of the presence of files and explanation
+printf "${Purple}Your ORIGINAL CERTBOT SSL certificate and chain have been saved here: \n
+/etc/letsencrypt/live/$var1.$var0/fullchain.pem \n
+Your CERTBOT ORIGNAL SSL key file has been saved here: \n
+/etc/letsencrypt/live/$var1.$var0/privkey.pem\n\e[1;30m ${ResetColor}\n"
 
 echo  "\e[1;31m\nIl ne faut pas utiliser les ORIGINAUX dans les applications ou sites web mais uniquement les COPIES :\e[1;30m"
 echo  "\e[1;34mVos certificats dupliques et AVEC LES BONS DROITS sont enregistres ici :"
@@ -667,17 +666,18 @@ echo  "$renew1"
 echo  "$renew2 \e[1;30m"
 echo  "\e[1;31m\nLe renouvellement se fera automatiquement tous les 1er du mois a 3h15\n\e[1;30m"
 echo  "\e[1;32m\nConfiguration du script de renouvellement automatique du SSL via CERTBOT 'OK'\n\e[1;30m"
-sleep 3;;
+your log file of renew is /var/log/renew-ssl-cerbot.log
+sleep 3
 
-[nN]*)
-echo  "\e[1;33m\nConfiguration du SSL via certbot 'ANNULEE'\n\e[1;30m"
-sleep 3;;
+elif [[ "$cert" =~ ^[nN] ]]; then
+	printf "\n${Purple}'OK' ${Blue}SSL auto renew for Webmin through CERTBOT was 'CANCELLED'${ResetColor}\n"
+        printf "${Blue}Your webmin only use the auto generated certificate by default${ResetColor}\n"
+        sleep 3
 
-*) echo "\e[1;31m\nERREUR de saisie, veuillez relancer le script $0\n\e[30m"
-exit 1;;
-
-esac
-
+        else
+        printf "\n${Red}'INPUT ERROR' Go to restart the script${Purple} '$0' ${ResetColor}\n"
+	./"$0"
+fi
 }
 
 
