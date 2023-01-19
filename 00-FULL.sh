@@ -173,7 +173,7 @@ ConfSOURCES
 GoUPDATES
 ConfSSL
 ConfWEBMIN
-ConfSAMBA4ADDCPrimary
+ConfSAMBA4AD
 ConfRSYNCsrv
 ConfNTPServer
 GoReboot
@@ -193,7 +193,7 @@ ConfSOURCES
 GoUPDATES
 ConfSSL
 ConfWEBMIN
-ConfSAMBA4ADDCSecondary
+ConfSAMBA4AD
 ConfRSYNCget
 ConfNTPClient
 GoReboot
@@ -601,10 +601,9 @@ sleep 3
 
 
 ######################################################################
-# Configuring SSL auto renew for Webmin through CERTBOT # A REVOIR COMPLETEMENT # UNIVERSAL VERSION # 
+# Configuring SSL auto renew for Webmin through CERTBOT # UNIVERSAL VERSION # 
 
 function ConfSSL {
-
 printf "${Yellow}Configuring SSL auto renew for Webmin through CERTBOT${ResetColor}\n"
 printf "${Red}Is this machine accessible from the outside via port 80? (Y/N)${ResetColor}\n"
 
@@ -652,21 +651,19 @@ cronjob1="15 3 1 * * $croncmd1"
 # add crontab
 ( crontab -l | grep -v -F "$croncmd1" ; echo "$cronjob1" ) | crontab -
 
-# verification of the presence of files and explanation
+# verify files and explanations of operation
 printf "${Purple}Your ORIGINAL CERTBOT SSL certificate and chain have been saved here: \n
 /etc/letsencrypt/live/$var1.$var0/fullchain.pem \n
 Your CERTBOT ORIGNAL SSL key file has been saved here: \n
 /etc/letsencrypt/live/$var1.$var0/privkey.pem\n\e[1;30m ${ResetColor}\n"
 
-echo  "\e[1;31m\nIl ne faut pas utiliser les ORIGINAUX dans les applications ou sites web mais uniquement les COPIES :\e[1;30m"
-echo  "\e[1;34mVos certificats dupliques et AVEC LES BONS DROITS sont enregistres ici :"
-renew1=$(ls -ahl /etc/ssl/certs/$var1.$var0*)
-renew2=$(ls -ahl /etc/ssl/private/$var1.$var0*)
-echo  "$renew1"
-echo  "$renew2 \e[1;30m"
-echo  "\e[1;31m\nLe renouvellement se fera automatiquement tous les 1er du mois a 3h15\n\e[1;30m"
-echo  "\e[1;32m\nConfiguration du script de renouvellement automatique du SSL via CERTBOT 'OK'\n\e[1;30m"
-your log file of renew is /var/log/renew-ssl-cerbot.log
+printf  "${Red}\nORIGINALS should not be used in applications or websites but only COPIES: ${ResetColor}\n"
+printf  "${Blue}Your duplicate certificates and WITH THE RIGHT RIGHTS are registered here: ${ResetColor}"
+renew1=$(ls -ahl /etc/ssl/certs/$var1.$var0*) && printf  "$renew1"
+renew2=$(ls -ahl /etc/ssl/private/$var1.$var0*) && printf  "$renew2\n"
+printf  "${Red}The renewal will be done automatically every 1st of the month at 3:15 a.m.${ResetColor}"
+printf  "${Blue}Your log file of renew is '/var/log/renew-ssl-cerbot.log'${ResetColor}\n"
+printf  "${Cyan}Configuring SSL auto-renewal script via CERTBOT ${Green}'OK'${ResetColor}\n"
 sleep 3
 
 elif [[ "$cert" =~ ^[nN] ]]; then
@@ -687,17 +684,16 @@ fi
 # Configuring Webmin # UNIVERSAL VERSION #
 
 function ConfWEBMIN {
-
-# Install the necessary packages for Webmin
+# install the necessary packages for Webmin
 apt install -y shared-mime-info perl libnet-ssleay-perl openssl libauthen-pam-perl libpam-runtime libio-pty-perl apt-show-versions python unzip zip
 
-# Download & install latest version of Webmin
+# download & install latest version of Webmin
 cd /tmp
 wget http://prdownloads.sourceforge.net/webadmin/webmin_1.962_all.deb
 dpkg --install webmin_1.962_all.deb
 rm -dfr webmin_1.962_all.deb
 
-# Print informations & sleep 3 secondes
+# print informations & sleep 3 secondes
 printf "${Cyan}Configuring Webmin ${Green}'OK' ${ResetColor}\n"
 printf "${Yellow}Webmin is accessible through ${Purple}https://"$var2":10000 ${ResetColor}\n"
 printf "${Yellow}Your login name : ${Purple}"$USER" ${ResetColor}\n"
@@ -707,25 +703,21 @@ sleep 3
 
 
 ######################################################################
-# Configuration de BIND9 #
-
-
-##########################
-# Configuration de BIND9 #
-#     Config pour NS1    #
-##########################
-
+# Configuring BIND9 #
 
 function ConfBIND9 {
-
+#     Config for (NS1)    #
 if [ "$var1" = "ns1" ]; then
 ServerIP="$var5"
+printf "${Blue}Start Bind9 configuration for server "$ServerIP" ${ResetColor}\n"
 fi
-
+#     Config for (NS2)    #
 if [ "$var1" = "ns2" ]; then
 ServerIP="$var4"
+printf "${Blue}Start Bind9 configuration for server "$ServerIP" ${ResetColor}\n"
 fi
 
+# install the necessary packages Bind9
 apt install -y bind9 bind9utils bind9-doc
 systemctl enable bind9
 systemctl start bind9
@@ -786,12 +778,11 @@ EOF
 ##### /etc/bind/named.conf.options #####
 
 
-##### /etc/bind/named.conf.local #####
-##### cut de l'ip du srv aux 3 premiers blocs, exemple 192.168.0
+##### cut from the ip of the srv to the first 3 blocks, example 192.168.0
 ipcut=`echo $var2 |cut -d. -f 1,2,3`
-##### retournement du cut de l'ip du srv, exemple 0.168.192
+##### reversal of the cut of the ip of the srv, example 0.168.192
 ipcutrev=`echo $var2 | awk -F. '{print $3"."$2"."$1}'`
-#########
+##### /etc/bind/named.conf.local #####
 cp /etc/bind/named.conf.local /etc/bind/named.conf.local.old
 cat <<EOF > /etc/bind/named.conf.local
 //
@@ -882,18 +873,17 @@ EOF
 ##### /var/lib/bind/$var0.hosts #####
 
 
-##### /var/lib/bind/$ipcut.rev #####
-##### retournement de l'ip du dns primaire
+##### reversal of the primary dns ip
 ipns1rev=`echo $var4 | awk -F. '{print $4"."$3"."$2"."$1}'`
-##### retournement de l'ip du dns secondaire
+##### reversal of the secondary dns ip
 ipns2rev=`echo $var5 | awk -F. '{print $4"."$3"."$2"."$1}'`
-##### retournement de l'ip du srv addcp
+##### reversal of the addcp srv ip
 ipaddcprev=`echo $var15 | awk -F. '{print $4"."$3"."$2"."$1}'`
-##### retournement de l'ip du srv addcs
+##### reversal of the addcs srv ip
 ipaddcsrev=`echo $var16 | awk -F. '{print $4"."$3"."$2"."$1}'`
-##### retournement de l'ip du srv fichiers
+##### reversal of the ip of the srv files
 ipfichiersrev=`echo $var19 | awk -F. '{print $4"."$3"."$2"."$1}'`
-
+##### /var/lib/bind/$ipcut.rev #####
 cat <<EOF > /var/lib/bind/$ipcut.rev
 \$ttl 38400
 $ipcutrev.in-addr.arpa.        IN      SOA     $var1.$var0. admin.$var0. (
@@ -911,16 +901,153 @@ $ipfichiersrev.in-addr.arpa.      IN      PTR     fichiers.$var0.
 EOF
 ##### /var/lib/bind/$ipcut.rev #####
 
+# restart service bind9
 systemctl restart bind9
 
-echo  "\e[1;32m\nConfiguration de BIND9 'OK'\n\e[1;30m"
+printf "${Cyan}Configuring BIND9 ${Green}'OK' ${ResetColor}\n"
 sleep 3
 }
 
 
+######################################################################
+# Server configuration (ADDCP) SAMBA 4 AD DC Primary #
+# OR #
+# Server configuration (ADDCS) SAMBA 4 AD DC Secondary #
+
+function ConfSAMBA4AD {
+#     Banner for (ADDCP)    #
+if [ "$var1" = "addcp" ]; then
+printf "${Blue}Start Server configuration "$var18" SAMBA 4 AD DC Primary ${ResetColor}\n"
+fi
+#     Banner for (ADDCS)    #
+if [ "$var1" = "addcs" ]; then
+printf "${Blue}Start Server configuration "$var18" SAMBA 4 AD DC Secondary ${ResetColor}\n"
+fi
+
+
+##############
+# /etc/fstab #
+##############
+cp /etc/fstab  /etc/fstab.old
+# get primary partition UUID
+UUID=`cat /etc/fstab | grep ext4 | awk -F/ '{print $1}'`
+# deleting the line /ext4 primary partition
+sed -i".bak" '/ext4/d' /etc/fstab
+# creating the line /ext4 primary partition with the new attributes
+echo "$UUID    /    ext4    noatime,nodiratime,user_xattr,acl,errors=remount-ro    0    1" >> /etc/fstab
+
+printf  "${Green}\nConfigure FSTAB 'OK' ${ResetColor}\n"
+printf  "${Red}\nSeveral windows will appear, just hit 'ENTER' each time ${ResetColor}\n"
+sleep 20
+
+# install packages for samba4 4 AD DC
+apt install -y samba krb5-user krb5-config winbind libpam-winbind libnss-winbind acl
+printf  "${Green}\nInstallation of Samba4 4 AD DC packages 'OK' ${ResetColor}\n"
+
+
+##################
+# /etc/krb5.conf #
+##################
+cp /etc/krb5.conf /etc/krb5.conf.old
+cat <<EOF > /etc/krb5.conf
+[libdefaults]
+	default_realm = $var8
+    dns_lookup_realm = false
+    dns_lookup_kdc = true
+
+# The following krb5.conf variables are only for MIT Kerberos.
+	kdc_timesync = 1
+	ccache_type = 4
+	forwardable = true
+	proxiable = true
+
+# The following encryption type specification will be used by MIT Kerberos
+# if uncommented.  In general, the defaults in the MIT Kerberos code are
+# correct and overriding these specifications only serves to disable new
+# encryption types as they are added, creating interoperability problems.
+#
+# The only time when you might need to uncomment these lines and change
+# the enctypes is if you have local software that will break on ticket
+# caches containing ticket encryption types it doesn't know about (such as
+# old versions of Sun Java).
+
+#	default_tgs_enctypes = des3-hmac-sha1
+#	default_tkt_enctypes = des3-hmac-sha1
+#	permitted_enctypes = des3-hmac-sha1
+
+# The following libdefaults parameters are only for Heimdal Kerberos.
+	fcc-mit-ticketflags = true
+
+[realms]
+	$var8 = {
+		kdc = $var0
+		admin_server = $var0
+	}
+
+[domain_realm]
+		.$var0 = $var8
+		$var0 = $var8
+EOF
+printf  "${Green}\nConfiguration KERBEROS 'OK' ${ResetColor}\n"
+
+
+# stop old services
+systemctl stop samba-ad-dc.service smbd.service nmbd.service winbind.service
+systemctl disable samba-ad-dc.service smbd.service nmbd.service winbind.service
+
+# moved old Samba 4 conf file
+mv /etc/samba/smb.conf /etc/samba/smb.conf.old1
+
+
+#     Config for (ADDCP)    #
+if [ "$var1" = "addcp" ]; then
+# creation of the samba 4 domain #
+samba-tool domain provision --use-rfc2307 --realm $var8 --domain $var7 --server-role dc --dns-backend BIND9_FLATFILE --adminpass $var17
+#samba-tool domain provision --use-rfc2307 --realm $var8 --domain $var7 --server-role dc --dns-backend SAMBA_INTERNAL --adminpass $var17
+#samba-tool domain provision --use-rfc2307 --realm $var8 --domain $var7 --server-role dc --dns-backend BIND9_DLZ --adminpass $var17
+printf  "${Green}\nCreation of the domain $var7 'OK' ${ResetColor}\n"
+fi
+
+#     Config for (ADDCS)    #
+if [ "$var1" = "addcs" ]; then
+# Joining the Samba4 AD DC from the ADDCP srv as a secondary domain controller #
+samba-tool domain join $var0 DC -U "administrator" --password "$var17"
+printf  "${Green}\nDomain join $var7 'OK' ${ResetColor}\n"
+fi
+
+
+# service management
+systemctl unmask samba-ad-dc.service
+systemctl enable samba-ad-dc.service
+systemctl start samba-ad-dc.service
+
+# information about Domain
+printf  "${Blue}\nHere is the information about your SAMBA 4 AD DC domain: ${Yellow}\n"
+samba-tool domain level show
+
+# information about Kerberos
+echo "$var17" | kinit administrator@$var8
+printf  "${Blue}\n\nHere is your Kerberos information: ${Yellow}\n"
+klist
+
+
+#######################
+# /etc/samba/smb.conf #
+#######################
+
+#########
+#########       POUR CONTINUER IL FAUT COMPARER ADDCP ET ADDCS 
+#########     
+
+
+}
+
+
+
+
 
 ################################################################
-#  SCRIPT START HERE
+#  MAIN SCRIPT START HERE
 ################################################################
 
 BANNER1
