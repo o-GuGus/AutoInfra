@@ -75,7 +75,7 @@ function RootorUser {
 	if [ $Name != "root" ]; then
 			if ! sudo -l; then
 			printf "${Red}'$Name' Is not a sudoers account${ResetColor}\n"
-			printf "${Red}Please logged in on a root or admin account and restart the script "$0" ${ResetColor}\n"
+			printf "${Red}Please logged in on a root or admin account and restart the script $0 ${ResetColor}\n"
 			exit 1
 			else
 				printf "${Green}'$Name' Is a sudoers account${ResetColor}\n"
@@ -360,28 +360,10 @@ printf "${Yellow}Hostname uppercase:${Green} $var18 ${ResetColor}\n"
 printf "${Yellow}File srv IP address:${Green} $var19 ${ResetColor}\n"
 printf "${Yellow}ADDCP root password:${Green} $var20 ${ResetColor}\n"
 
-# export all variables for functions
-export $var0
-export $var1
-export $var2
-export $var3
-export $var4
-export $var5
-export $var6
-export $var7
-export $var8
-export $var9
-export $var10
-export $var11
-export $var12
-export $var13
-export $var14
-export $var15
-export $var16
-export $var17
-export $var18
-export $var19
-export $var20
+# Export all variables for functions, from 0 to 20
+for i in {0..20}; do
+  export var$i
+done
 
 # Informations is correct ?! #
 printf "\n${Yellow}Informations is correct ?! (Y/N)${ResetColor}\n"
@@ -676,7 +658,7 @@ function ConfWEBMIN {
 apt install -y shared-mime-info perl libnet-ssleay-perl openssl libauthen-pam-perl libpam-runtime libio-pty-perl apt-show-versions python unzip zip
 
 # download & install latest version of Webmin
-cd /tmp
+cd /tmp || exit 1
 wget http://prdownloads.sourceforge.net/webadmin/webmin_1.962_all.deb
 dpkg --install webmin_1.962_all.deb
 rm -dfr webmin_1.962_all.deb
