@@ -174,7 +174,7 @@ GoUPDATES
 ConfSSL
 ConfWEBMIN
 ConfSAMBA4AD
-ConfRSYNCsrv
+ConfRSYNCSysVol
 ConfNTPServer
 GoReboot
 ;;
@@ -194,7 +194,7 @@ GoUPDATES
 ConfSSL
 ConfWEBMIN
 ConfSAMBA4AD
-ConfRSYNCget
+ConfRSYNCSysVol
 ConfNTPClient
 GoReboot
 ;;
@@ -779,9 +779,9 @@ EOF
 
 
 ##### cut from the ip of the srv to the first 3 blocks, example 192.168.0
-ipcut=`echo $var2 |cut -d. -f 1,2,3`
+ipcut=$(echo $var2 |cut -d. -f 1,2,3)
 ##### reversal of the cut of the ip of the srv, example 0.168.192
-ipcutrev=`echo $var2 | awk -F. '{print $3"."$2"."$1}'`
+ipcutrev=$(echo $var2 | awk -F. '{print $3"."$2"."$1}')
 ##### /etc/bind/named.conf.local #####
 cp /etc/bind/named.conf.local /etc/bind/named.conf.local.old
 cat <<EOF > /etc/bind/named.conf.local
@@ -874,15 +874,15 @@ EOF
 
 
 ##### reversal of the primary dns ip
-ipns1rev=`echo $var4 | awk -F. '{print $4"."$3"."$2"."$1}'`
+ipns1rev=$(echo $var4 | awk -F. '{print $4"."$3"."$2"."$1}')
 ##### reversal of the secondary dns ip
-ipns2rev=`echo $var5 | awk -F. '{print $4"."$3"."$2"."$1}'`
+ipns2rev=$(echo $var5 | awk -F. '{print $4"."$3"."$2"."$1}')
 ##### reversal of the addcp srv ip
-ipaddcprev=`echo $var15 | awk -F. '{print $4"."$3"."$2"."$1}'`
+ipaddcprev=$(echo $var15 | awk -F. '{print $4"."$3"."$2"."$1}')
 ##### reversal of the addcs srv ip
-ipaddcsrev=`echo $var16 | awk -F. '{print $4"."$3"."$2"."$1}'`
+ipaddcsrev=$(echo $var16 | awk -F. '{print $4"."$3"."$2"."$1}')
 ##### reversal of the ip of the srv files
-ipfichiersrev=`echo $var19 | awk -F. '{print $4"."$3"."$2"."$1}'`
+ipfichiersrev=$(echo $var19 | awk -F. '{print $4"."$3"."$2"."$1}')
 ##### /var/lib/bind/$ipcut.rev #####
 cat <<EOF > /var/lib/bind/$ipcut.rev
 \$ttl 38400
@@ -930,7 +930,7 @@ fi
 ##############
 cp /etc/fstab  /etc/fstab.old
 # get primary partition UUID
-UUID=`cat /etc/fstab | grep ext4 | awk -F/ '{print $1}'`
+UUID=$(cat /etc/fstab | grep ext4 | awk -F/ '{print $1}')
 # deleting the line /ext4 primary partition
 sed -i".bak" '/ext4/d' /etc/fstab
 # creating the line /ext4 primary partition with the new attributes
@@ -1034,16 +1034,354 @@ klist
 #######################
 # /etc/samba/smb.conf #
 #######################
+cp /etc/samba/smb.conf /etc/samba/smb.conf.old2
+cat <<EOF > /etc/samba/smb.conf
+# Global parameters
+[global]
+    netbios name = $var18
+    workgroup = $var7
+    realm = $var8
+    server role = active directory domain controller
+    idmap_ldb:use rfc2307 = yes
+      dns forwarder = $var4,$var5
 
-#########
-#########       POUR CONTINUER IL FAUT COMPARER ADDCP ET ADDCS 
-#########     
+# logs
+log file = /var/log/samba/%m.log
+log level = 1
+
+# acl
+vfs objects = acl_xattr
+map acl inherit = yes
+store dos attributes = yes
+
+# template homedir & shell
+template homedir = /home/%D/%U
+template shell = /bin/bash
+
+# winbind
+winbind use default domain = yes
+winbind offline logon = false
+winbind nss info = rfc2307
+winbind enum users = yes
+winbind enum groups = yes
+
+# Desactiver les connections null session
+restrict anonymous = 2
+
+# Desactiver NetBIOS
+disable netbios = yes
+
+# Desactiver le support des imprimantes
+printcap name = /dev/null
+load printers = no
+disable spoolss = yes
+printing = bsd
+
+# Generer des hashes de mot de passe supplementaires
+password hash userPassword schemes = CryptSHA256 CryptSHA512
+
+# Desactiver NTLMv1
+ntlm auth = mschapv2-and-ntlmv2-only
+
+# dossiers
+    [netlogon]
+        path = /var/lib/samba/sysvol/$var0/scripts
+        read only = No
+
+    [sysvol]
+        path = /var/lib/samba/sysvol
+        read only = No
+EOF
+
+# reboot service samba 4 ad dc
+systemctl restart samba-ad-dc.service
+
+printf "${Green}\nConfiguring /etc/samba/smb.conf 'OK' ${ResetColor}\n"
 
 
+####################
+# NSS login system #
+####################
+
+# creer un repertoire personnel lors de la connexion
+pam-auth-update --enable mkhomedir
+printf "${Green}\nHome directory has connection 'OK' ${ResetColor}\n"
+
+# pour pouvoir authentifier et ouvrir une session ad sur le systeme local
+cp /etc/nsswitch.conf /etc/nsswitch.conf.old
+cat <<EOF > /etc/nsswitch.conf
+# /etc/nsswitch.conf
+#
+# Example configuration of GNU Name Service Switch functionality.
+# If you have the 'glibc-doc-reference' and 'info' packages installed, try:
+# 'info libc Name Service Switch' for information about this file.
+
+passwd:         compat winbind
+group:          compat winbind
+shadow:         compat winbind
+gshadow:        files
+
+hosts:          files dns
+networks:       files
+
+protocols:      db files
+services:       db files
+ethers:         db files
+rpc:            db files
+
+netgroup:       nis
+EOF
+printf "${Green}\nConfigure NSS 'OK' ${ResetColor}\n"
+
+# suppression de "try_authtok"
+# les utilisateurs authentifies localement sur linux ne peuvent pas modifier leur mot de passe depuis la console
+cp /etc/pam.d/common-password /etc/pam.d/common-password.old
+cat <<EOF > /etc/pam.d/common-password
+#
+# /etc/pam.d/common-password - password-related modules common to all services
+#
+# This file is included from other service-specific PAM config files,
+# and should contain a list of modules that define the services to be
+# used to change user passwords.  The default is pam_unix.
+
+# Explanation of pam_unix options:
+#
+# The "sha512" option enables salted SHA512 passwords.  Without this option,
+# the default is Unix crypt.  Prior releases used the option "md5".
+#
+# The "obscure" option replaces the old 'OBSCURE_CHECKS_ENAB' option in
+# login.defs.
+#
+# See the pam_unix manpage for other options.
+
+# As of pam 1.0.1-6, this file is managed by pam-auth-update by default.
+# To take advantage of this, it is recommended that you configure any
+# local modules either before or after the default block, and use
+# pam-auth-update to manage selection of other modules.  See
+# pam-auth-update(8) for details.
+
+# here are the per-package modules (the "Primary" block)
+password        [success=2 default=ignore]      pam_unix.so obscure sha512
+
+### ancienne ligne ###
+### password        [success=1 default=ignore]      pam_winbind.so try_authtok try_first_pass
+
+### nouvelle ligne ###
+password        [success=1 default=ignore]      pam_winbind.so try_first_pass
+
+# here's the fallback if no module succeeds
+password        requisite                       pam_deny.so
+# prime the stack with a positive return value if there isn't one already;
+# this avoids us returning an error just because nothing sets a success code
+# since the modules above will each just jump around
+password        required                        pam_permit.so
+# and here are more per-package modules (the "Additional" block)
+# end of pam-auth-update config
+EOF
+printf "${Green}\nRemove try_authtok 'OK'${ResetColor}\n"
+
+# les binaires Samba4 sont livres avec un demon winbind integre et active par defaut
+# desactivation du demon winbind fourni par le package winbind a partir des referentiels debian officiels
+systemctl disable winbind.service
+systemctl stop winbind.service
+
+printf "${Blue}\n\nHere is the information of the groups currently present on the domain ${Yellow}\n"
+wbinfo -g
+
+printf "${Blue}\n\nHere is the list of users currently present on the domain ${Yellow}\n"
+wbinfo -u
+getent passwd | grep $var7
+
+printf "${Blue}\n\nHere are the password settings for your domain ${Yellow}\n"
+samba-tool domain passwordsettings show
+sleep 3
+
+#     Config for (ADDCP)    #
+if [ "$var1" = "addcp" ]; then
+printf "${Green}\nConfiguring SAMBA 4 AD DC Primary 'OK' ${ResetColor}\n"
+sleep 3
+fi
+
+#     Config for (ADDCS)    #
+if [ "$var1" = "addcs" ]; then
+printf "${Green}\nConfiguring SAMBA 4 AD DC Secondary 'OK' ${ResetColor}\n"
+sleep 3
+fi
 }
 
 
+#################################################################
+# SysVol replication from the first domain controller via Rsync #
+function ConfRSYNCSysVol {
 
+#     Config for (ADDCP)    #
+if [ "$var1" = "addcp" ]; then
+apt install -y rsync
+printf "${Green}\nSysVol replication SERVER 'OK' ${ResetColor}\n"
+sleep 3
+fi
+
+#     Config for (ADDCS)    #
+if [ "$var1" = "addcs" ]; then
+printf "${Blue}\nSysVol CLIENT replication being configured ${ResetColor}\n"
+
+# installation des paquets
+apt install -y rsync sshpass
+
+# generation d'une cle ssh
+ssh-keygen -t rsa -f /root/.ssh/rsa_SysVol -q -P ""
+
+# copie de la cle sur le serveur ADDCP
+sshpass -p $var20 ssh-copy-id -i /root/.ssh/rsa_SysVol root@addcp -f
+
+# test de replication
+sshpass -p $var20 rsync -XAavz --chmod=775 --delete-after --progress --stats -e "ssh -o StrictHostKeyChecking=no" root@addcp:/var/lib/samba/sysvol/ /var/lib/samba/sysvol/
+
+# stockage du pass pour syncro cron
+echo "$var20" > /root/.ssh/SysVol_pass
+chmod 600 /root/.ssh/SysVol_pass
+
+# ajout d'une tache automatique cron toutes les 5 minutes
+croncmd2="sshpass -f /root/.ssh/SysVol_pass rsync -XAavz --chmod=775 --delete-after --progress --stats root@addcp:/var/lib/samba/sysvol/ /var/lib/samba/sysvol/ > /var/log/sysvol-replication.log 2>&1"
+cronjob2="*/5 * * * * $croncmd2"
+( crontab -l | grep -v -F "$croncmd2" ; echo "$cronjob2" ) | crontab -
+
+printf "${Green}\nConfiguring SysVol Replication CLIENT 'OK' ${ResetColor}\n"
+sleep 3
+fi
+}
+
+
+######################################################################
+# Configuration du serveur NTP #
+function ConfNTPServer {
+apt install -y ntp ntpdate
+
+cp /etc/ntp.conf /etc/ntp.conf.old
+cat <<EOF > /etc/ntp.conf
+# Path for file used to store the frequency offset between the system clock and NTP time servers
+driftfile /var/lib/ntp/ntp.drift
+
+# Path for the socket used by ntpd to communicate with Samba's ntp_signd daemon (for signing NTP packets)
+ntpsigndsocket /var/lib/samba/ntp_signd/
+
+# Leap seconds definition provided by tzdata
+leapfile /usr/share/zoneinfo/leap-seconds.list
+
+# Enable this if you want statistics to be logged.
+#statsdir /var/log/ntpstats/
+statistics loopstats peerstats clockstats
+filegen loopstats file loopstats type day enable
+filegen peerstats file peerstats type day enable
+filegen clockstats file clockstats type day enable
+
+# Configure NTP time servers to synchronize with (here using the pool.ntp.org DNS names)
+server 0.pool.ntp.org
+server 1.pool.ntp.org
+server 2.pool.ntp.org
+server 3.pool.ntp.org
+
+# By default, exchange time with everybody, but don't allow configuration.
+restrict -4 default kod notrap nomodify nopeer noquery limited
+restrict -6 default kod notrap nomodify nopeer noquery limited
+
+# Local users may interrogate the ntp server more closely.
+restrict 127.0.0.1
+restrict ::1
+
+# Needed for adding pool entries
+restrict source nomodify notrap noquery mssntp
+restrict default kod nomodify notrap nopeer mssntp
+
+# Disable panic mode (0=don't panic)
+tinker panic 0
+EOF
+
+# application des droits
+chown root:ntp /var/lib/samba/ntp_signd/
+chmod 750 /var/lib/samba/ntp_signd/
+
+# restart ntp service
+systemctl restart ntp
+
+# verification du ntp
+printf "${Yellow}\nVerification des pairs du serveur ntp ${ResetColor}\n"
+ntpq -p
+
+printf "${Green}\nConfiguration du serveur NTP 'OK' ${ResetColor}\n"
+sleep 3
+}
+
+
+######################################################################
+# Configuration du Client NTP #
+function ConfNTPClient {
+apt install -y ntp ntpdate
+
+cp /etc/ntp.conf /etc/ntp.conf.old
+cat <<EOF > /etc/ntp.conf
+# Path for file used to store the frequency offset between the system clock and NTP time servers
+driftfile /var/lib/ntp/ntp.drift
+
+# Configure NTP time servers to synchronize with (here using the server $var15 DNS names)
+server $var15
+pool $var0
+
+# By default, exchange time with everybody, but don't allow configuration.
+restrict -4 default kod notrap nomodify nopeer noquery limited
+restrict -6 default kod notrap nomodify nopeer noquery limited
+
+# Local users may interrogate the ntp server more closely.
+restrict 127.0.0.1
+restrict ::1
+
+# Needed for adding pool entries
+restrict default kod nomodify notrap nopeer mssntp
+
+# Disable panic mode (0=don't panic)
+tinker panic 0
+EOF
+
+# restart ntp service
+systemctl restart ntp
+
+# verification du ntp
+printf "${Yellow}\nVerification des pairs du Client NTP ${ResetColor}\n"
+ntpq -p
+
+printf "${Yellow}\nSynchronisation avec le serveur NTP du domaine "$var0" ${ResetColor}\n"
+ntpdate -bu $var0
+
+# ajout d'une tache automatique cron toutes les jours a 23hx pour la syncro de l'heure avec le domaine
+chiffre=$(awk -v min=1 -v max=59 'BEGIN{srand(); print int(min+rand()*(max-min+1))}')
+croncmd3="/usr/sbin/ntpdate -bu $var0 > /var/log/ntp.log 2>&1"
+cronjob3="*/$chiffre 23 * * * $croncmd3"
+( crontab -l | grep -v -F "$croncmd3" ; echo "$cronjob3" ) | crontab -
+
+printf "${Green}\nConfiguration du Client NTP 'OK' ${ResetColor}\n"
+sleep 3
+}
+
+#####################################################################
+# Reboot #
+function GoReboot {
+printf "${Red}\nVotre serveur va redemmarrer dans 5 secondes .....\n"
+sleep 1
+echo  "\nVotre serveur va redemmarrer dans 4 secondes ....\n"
+sleep 1
+echo  "\nVotre serveur va redemmarrer dans 3 secondes ...\n"
+sleep 1
+echo  "\nVotre serveur va redemmarrer dans 2 secondes ..\n"
+sleep 1
+echo  "\nVotre serveur va redemmarrer dans 1 secondes . ${ResetColor}\n"
+sleep 1
+systemctl reboot
+}
+
+
+#########
+#########       POUR CONTINUER IL FAUT COMPARER ADDCP ET ADDCS 
+#########    
 
 
 ################################################################
