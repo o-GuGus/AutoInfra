@@ -1,65 +1,54 @@
 #!/bin/bash
-################################################################
-#  Magic_infra
-################################################################
-#
-# Version 2.0 - 2022-09-22
-#
-# By Gui-Gos
-#
-################################################################
+################################################################################
+# Name : AutoInfra
+# Author: o-GuGus
+# Creation Date: 2020-09-28   Revision Date : 2023-04-25
+# Description: Bash script for infrastructure deployment on Debian 
+# Usage: /bin/bash -c "$(curl -sSL https://raw.githubusercontent.com/o-GuGus/AutoInfra/master/deploy.sh)"
+# Notes: Any special notes about the script
+# References: List any references used in the script, such as tutorials or manuals
+################################################################################
 
 
 ######################################################################
-# clear screen
+# Clear screen
 clear
-# set color variables for printf or echo
-Black="\e[0;30m"
+# Set color variables for printf or echo
 Red="\e[0;31m"
 Green="\e[0;32m"
 Yellow="\e[0;33m"
 Blue="\e[0;34m"
 Purple="\e[0;35m"
 Cyan="\e[0;36m"
-White="\e[0;37m"
-Grey="\e[0;39m"
 ResetColor="\e[0m"
-# example 'printf "${Green}"$VARIABLE" or text${ResetColor}\n"'
-
-
-
-
+# example (printf "${Green}%s${ResetColor}\n" "Hello in green color")
 
 
 ######################################################################
-# Banners #
-
-function BANNER1 { # ANSI Shadow
-printf "███╗   ███╗ █████╗  ██████╗ ██╗ ██████╗    ██╗███╗   ██╗███████╗██████╗  █████╗ 
-████╗ ████║██╔══██╗██╔════╝ ██║██╔════╝    ██║████╗  ██║██╔════╝██╔══██╗██╔══██╗
-██╔████╔██║███████║██║  ███╗██║██║         ██║██╔██╗ ██║█████╗  ██████╔╝███████║
-██║╚██╔╝██║██╔══██║██║   ██║██║██║         ██║██║╚██╗██║██╔══╝  ██╔══██╗██╔══██║
-██║ ╚═╝ ██║██║  ██║╚██████╔╝██║╚██████╗    ██║██║ ╚████║██║     ██║  ██║██║  ██║
-╚═╝     ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚═╝ ╚═════╝    ╚═╝╚═╝  ╚═══╝╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝\n"
-}
-
-function BANNER2 { # ANSI Regular
-printf "██████  ██    ██      ██████  ██    ██ ██  ██████   ██████  ███████ 
-██   ██  ██  ██      ██       ██    ██ ██ ██       ██    ██ ██      
-██████    ████       ██   ███ ██    ██ ██ ██   ███ ██    ██ ███████ 
-██   ██    ██        ██    ██ ██    ██ ██ ██    ██ ██    ██      ██ 
-██████     ██         ██████   ██████  ██  ██████   ██████  ███████ \n\n\n"
+# Banners
+function BANNER { # ANSI Shadow & ANSI Regular
+printf " █████╗ ██╗   ██╗████████╗ ██████╗ ██╗███╗   ██╗███████╗██████╗  █████╗ 
+██╔══██╗██║   ██║╚══██╔══╝██╔═══██╗██║████╗  ██║██╔════╝██╔══██╗██╔══██╗
+███████║██║   ██║   ██║   ██║   ██║██║██╔██╗ ██║█████╗  ██████╔╝███████║
+██╔══██║██║   ██║   ██║   ██║   ██║██║██║╚██╗██║██╔══╝  ██╔══██╗██╔══██║
+██║  ██║╚██████╔╝   ██║   ╚██████╔╝██║██║ ╚████║██║     ██║  ██║██║  ██║
+╚═╝  ╚═╝ ╚═════╝    ╚═╝    ╚═════╝ ╚═╝╚═╝  ╚═══╝╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝\n"
+printf "██████  ██    ██      ██████  ██    ██  ██████  ██    ██ ███████ 
+██   ██  ██  ██      ██       ██    ██ ██       ██    ██ ██      
+██████    ████       ██   ███ ██    ██ ██   ███ ██    ██ ███████ 
+██   ██    ██        ██    ██ ██    ██ ██    ██ ██    ██      ██ 
+██████     ██         ██████   ██████   ██████   ██████  ███████ \n\n\n"
 }
 
 
 ######################################################################
 # How this script works #
 function HowTo {
-printf "${Cyan}This script is planned for Debian 10 Buster${ResetColor}\n"
-printf "${Cyan}You must have fixed the IP adress of machines before continuing${ResetColor}\n\n"
+printf "${Cyan}%s${ResetColor}\n"       "This script is planned for Debian 10 Buster"
+printf "${Cyan}%s${ResetColor}\n\n"     "You must have fixed the IP adress of machines before continuing"
 
-printf "${Cyan}Here is an example of functional infrastructure:${ResetColor}\n"
-printf "${Cyan}#######################################################
+printf "${Cyan}%s${ResetColor}\n"       "Here is an example of functional infrastructure:"
+printf "${Cyan}%s${ResetColor}\n\n"     "#######################################################
 > Name serveur one	> NS1		> 192.168.1.201
 > Name serveur two	> NS2		> 192.168.1.202
 > Primary AD server	> ADDCP		> 192.168.1.203
@@ -71,11 +60,10 @@ printf "${Cyan}#######################################################
 
 > Subnet Mask network	> MASK		> 255.255.255.0 /24
 > Gateway of router	> GATEWAY	> 192.168.1.1
-#######################################################${ResetColor}\n\n"
+#######################################################"
 
-printf "${Cyan}For more information, please follow this link 'https://github.com/Gui-Gos/Magic_Infra/blob/402c45de9917a9185a97191149da37554d6b4b8e/README.md'${ResetColor}\n\n"
+printf "${Cyan}%s${ResetColor}\n\n"     "For more information, please follow this link 'https://raw.githubusercontent.com/o-GuGus/AutoInfra/master/infra.md'"
 }
-
 
 
 ######################################################################
@@ -1388,8 +1376,7 @@ systemctl reboot
 #  MAIN SCRIPT START HERE
 ################################################################
 
-BANNER1
-BANNER2
+BANNER
 HowTo
 RootorUser
 ChoiceMenu
