@@ -3,9 +3,11 @@ USER
 
 # Détail
 
-Questions #
-Demande du nom de la machine #
-Configuration des raccourcis "ll & nn" #
+Questions 
+
+Demande du nom de la machine 
+
+Configuration des raccourcis "ll & nn" 
 Configuration du PATH sbin #
 Configuration du SSH pour connexion en root #
 Configuration du RESEAU #
