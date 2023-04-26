@@ -9,7 +9,7 @@ USER
 # Configuration du fichier HOSTS #
 # Configuration du HOSTNAME #
 # Configuration du fichier sources.list #
-# Mises a jour #
+# Mises a jour
 
 # Jonction au domaine Samba4 AD DC & Connexion au serveur de FICHIERS #
 - fstab
