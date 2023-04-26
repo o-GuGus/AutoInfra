@@ -9,9 +9,8 @@
 # References: List any references used in the script, such as tutorials or manuals
 ################################################################################
 
-
-######################################################################
-# Clear screen
+################################################################################
+### Terminal Colors and Screen Clearing ###
 clear
 # Set color variables for printf or echo
 Red="\e[0;31m"
@@ -22,10 +21,10 @@ Purple="\e[0;35m"
 Cyan="\e[0;36m"
 ResetColor="\e[0m"
 # example (printf "${Green}%s${ResetColor}\n" "Hello in green color")
+################################################################################
 
-
-######################################################################
-# Banners
+################################################################################
+### Banners with ASCII art in Bash ###
 function BANNER { # ANSI Shadow & ANSI Regular
 printf " █████╗ ██╗   ██╗████████╗ ██████╗ ██╗███╗   ██╗███████╗██████╗  █████╗ 
 ██╔══██╗██║   ██║╚══██╔══╝██╔═══██╗██║████╗  ██║██╔════╝██╔══██╗██╔══██╗
@@ -39,28 +38,28 @@ printf "██████  ██    ██      ██████  ██    
 ██   ██    ██        ██    ██ ██    ██ ██    ██ ██    ██      ██ 
 ██████     ██         ██████   ██████   ██████   ██████  ███████ \n\n\n"
 }
+################################################################################
 
-
-######################################################################
+################################################################################
 # How this script works #
 function HowTo {
 printf "${Cyan}%s${ResetColor}\n"       "This script is planned for Debian 10 Buster"
 printf "${Cyan}%s${ResetColor}\n\n"     "You must have fixed the IP adress of machines before continuing"
 
 printf "${Cyan}%s${ResetColor}\n"       "Here is an example of functional infrastructure:"
-printf "${Cyan}%s${ResetColor}\n\n"     "#######################################################
-> Name serveur one	> NS1		> 192.168.1.201
-> Name serveur two	> NS2		> 192.168.1.202
-> Primary AD server	> ADDCP		> 192.168.1.203
-> Secondary AD server	> ADDCS		> 192.168.1.204
-> File server		> FILE		> 192.168.1.205
+printf "${Cyan}%s${ResetColor}\n"     "###########################################################"
+printf "${Cyan}%s${ResetColor}\n"       "> Name serveur one	> NS1		> 192.168.1.201"
+printf "${Cyan}%s${ResetColor}\n"       "> Name serveur two	> NS2		> 192.168.1.202"
+printf "${Cyan}%s${ResetColor}\n"       "> Primary AD server	> ADDCP		> 192.168.1.203"
+printf "${Cyan}%s${ResetColor}\n"       "> Secondary AD server	> ADDCS		> 192.168.1.204"
+printf "${Cyan}%s${ResetColor}\n\n"     "> File server		> FILE		> 192.168.1.205"
 
-> User machine 1	> USER1		> 192.168.1.101
-> User machine 2	> USER2		> 192.168.1.102
+printf "${Cyan}%s${ResetColor}\n"       "> User machine 1	> USER1		> 192.168.1.101"
+printf "${Cyan}%s${ResetColor}\n\n"     "> User machine 2	> USER2		> 192.168.1.102"
 
-> Subnet Mask network	> MASK		> 255.255.255.0 /24
-> Gateway of router	> GATEWAY	> 192.168.1.1
-#######################################################"
+printf "${Cyan}%s${ResetColor}\n"       "> Subnet Mask network	> MASK		> 255.255.255.0 /24"
+printf "${Cyan}%s${ResetColor}\n"       "> Gateway of router	> GATEWAY	> 192.168.1.1"
+printf "${Cyan}%s${ResetColor}\n\n"     "###########################################################"
 
 printf "${Cyan}%s${ResetColor}\n\n"     "For more information, please follow this link 'https://raw.githubusercontent.com/o-GuGus/AutoInfra/master/infra.md'"
 }
@@ -71,29 +70,27 @@ printf "${Cyan}%s${ResetColor}\n\n"     "For more information, please follow thi
 
 function RootorUser {
 	Name=$(whoami)
-	printf "${Yellow}Hello '$Name' We will test if you have sudo or root permissions${ResetColor}\n"
+	printf "${Blue}%s${ResetColor}\n" "Hello '$Name' We will test if you have sudo or root permissions"
 	if [ $Name != "root" ]; then
-			if ! sudo -l; then
-			printf "${Red}'$Name' Is not a sudoers account${ResetColor}\n"
-			printf "${Red}Please logged in on a root or admin account and restart the script $0 ${ResetColor}\n"
-			exit 1
-			else
-				printf "${Green}'$Name' Is a sudoers account${ResetColor}\n"
-                printf "${Yellow}Please logged in on your root account now, type your 'root' password${ResetColor}\n"
-                if ! sudo -u root "$0"; then
-                exit 1
-                fi
-			fi
+		if ! sudo -l; then
+		printf "${Red}%s${ResetColor}\n" "'$Name' Is not a sudoers account"
+		printf "${Red}%s${ResetColor}\n" "Please logged in on a root or admin account and restart the script '$0'"
+		exit 1
+		else
+		printf "${Green}%s${ResetColor}\n"  "'$Name' Is a sudoers account"
+                printf "${Yellow}%s${ResetColor}\n" "Please logged in on your root account now, type your 'root' password"
+                        if ! sudo -u root "$0"; then
+                        exit 1
+                        fi
+		fi
 	else
-		printf "${Green}'$Name' Is a good account${ResetColor}\n"
+		printf "${Green}%s${ResetColor}\n" "'$Name' Is a good account"
 	fi
 # if sudo -u root "$0" is launched, this condition exiting properly the first script lauched by user
 if [ $Name != "root" ]; then
 exit 0
 fi
 }
-
-
 
 
 ######################################################################
@@ -665,8 +662,8 @@ rm -dfr webmin_1.962_all.deb
 
 # print informations & sleep 3 secondes
 printf "${Cyan}Configuring Webmin ${Green}'OK' ${ResetColor}\n"
-printf "${Yellow}Webmin is accessible through ${Purple}https://"$var2":10000 ${ResetColor}\n"
-printf "${Yellow}Your login name : ${Purple}"$USER" ${ResetColor}\n"
+printf "${Yellow}Webmin is accessible through ${Purple}https://$var2:10000 ${ResetColor}\n"
+printf "${Yellow}Your login name : ${Purple}$USER ${ResetColor}\n"
 sleep 3
 }
 
@@ -679,12 +676,12 @@ function ConfBIND9 {
 #     Config for (NS1)    #
 if [ "$var1" = "ns1" ]; then
 ServerIP="$var5"
-printf "${Blue}Start Bind9 configuration for server "$ServerIP" ${ResetColor}\n"
+printf "${Blue}Start Bind9 configuration for server $ServerIP ${ResetColor}\n"
 fi
 #     Config for (NS2)    #
 if [ "$var1" = "ns2" ]; then
 ServerIP="$var4"
-printf "${Blue}Start Bind9 configuration for server "$ServerIP" ${ResetColor}\n"
+printf "${Blue}Start Bind9 configuration for server $ServerIP ${ResetColor}\n"
 fi
 
 # install the necessary packages Bind9
@@ -887,11 +884,11 @@ sleep 3
 function ConfSAMBA4AD {
 #     Banner for (ADDCP)    #
 if [ "$var1" = "addcp" ]; then
-printf "${Blue}Start Server configuration "$var18" SAMBA 4 AD DC Primary ${ResetColor}\n"
+printf "${Blue}Start Server configuration $var18 SAMBA 4 AD DC Primary ${ResetColor}\n"
 fi
 #     Banner for (ADDCS)    #
 if [ "$var1" = "addcs" ]; then
-printf "${Blue}Start Server configuration "$var18" SAMBA 4 AD DC Secondary ${ResetColor}\n"
+printf "${Blue}Start Server configuration $var18 SAMBA 4 AD DC Secondary ${ResetColor}\n"
 fi
 
 
@@ -1319,7 +1316,7 @@ systemctl restart ntp
 printf "${Yellow}\nVerification des pairs du Client NTP ${ResetColor}\n"
 ntpq -p
 
-printf "${Yellow}\nSynchronisation avec le serveur NTP du domaine "$var0" ${ResetColor}\n"
+printf "${Yellow}\nSynchronisation avec le serveur NTP du domaine $var0 ${ResetColor}\n"
 ntpdate -bu $var0
 
 # ajout d'une tache automatique cron toutes les jours a 23hx pour la syncro de l'heure avec le domaine
