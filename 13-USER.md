@@ -8,7 +8,7 @@ USER
 # Configuration du RESEAU #
 # Configuration du fichier HOSTS #
 # Configuration du HOSTNAME #
-# Configuration du fichier sources.list #
+## Configuration du fichier sources.list
 # Mises a jour
 
 # Jonction au domaine Samba4 AD DC & Connexion au serveur de FICHIERS #
