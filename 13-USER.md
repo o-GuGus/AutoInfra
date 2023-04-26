@@ -1,18 +1,15 @@
-USER
 ## USER
-
-# Détail
 
 Questions 
 
 > Demande du nom de la machine 
 
-Configuration des raccourcis "ll & nn" 
-Configuration du PATH sbin #
-Configuration du SSH pour connexion en root #
-Configuration du RESEAU #
-Configuration du fichier HOSTS #
-Configuration du HOSTNAME #
+Configuration des raccourcis "ll & nn"
+Configuration du PATH sbin
+Configuration du SSH pour connexion en root
+Configuration du RESEAU
+Configuration du fichier HOSTS
+Configuration du HOSTNAME
 Configuration du fichier sources.list
 Mises a jour
 
