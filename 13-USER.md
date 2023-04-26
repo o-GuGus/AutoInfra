@@ -11,7 +11,7 @@ USER
 ## Configuration du fichier sources.list
 # Mises a jour
 
-# Jonction au domaine Samba4 AD DC & Connexion au serveur de FICHIERS #
+Jonction au domaine Samba4 AD DC & Connexion au serveur de FICHIERS
 - fstab
 - krb5.conf
 - smb.conf
