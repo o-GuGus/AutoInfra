@@ -1196,8 +1196,9 @@ BANNER
 RootOrUser
 #
 HowTo
-###############################
-# Choice menu for deployement #
+############################################
+# menu that prompts the user to choose     #
+# which server or user they want to deploy #
 printf "${Yellow}%s${ResetColor}\n"                             "Which server/user do you want to deploy:"
 printf "${Yellow}%-4s ${Cyan}%-20s %s${ResetColor}\n"           "1)" "Name serveur one" "(NS1)"
 printf "${Yellow}%-4s ${Cyan}%-20s %s${ResetColor}\n"           "2)" "Name serveur two" "(NS2)"
@@ -1208,9 +1209,7 @@ printf "${Yellow}%-4s ${Cyan}%-20s %s${ResetColor}\n"           "6)" "User machi
 printf "${Yellow}%-4s ${Cyan}%-20s${ResetColor}\n\n"            "q)" "For Exit"
 read -r choice
 case $choice in
-###############################
-
-#########################################
+#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#
 # If Choice is : Name serveur one (NS1) #
 1)
 # Set machine name
@@ -1233,9 +1232,7 @@ ConfBIND9
 ConfNTPClient
 GoReboot
 ;;
-#########################################
-
-#########################################
+#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#
 # If Choice is : Name serveur two (NS2) #
 2)
 # Set machine name
@@ -1258,8 +1255,9 @@ ConfBIND9
 ConfNTPClient
 GoReboot
 ;;
-
-3) # Primary AD server    (ADDCP)
+#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#
+# If Choice is : Primary AD server (ADDCP)  #
+3)
 # Set machine name
 var1="addcp"
 # Infos
@@ -1281,9 +1279,9 @@ ConfRSYNCSysVol
 ConfNTPServer
 GoReboot
 ;;
-
-
-4) # Secondary AD server  (ADDCS)
+#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#
+# If Choice is : Secondary AD server (ADDCS)  #
+4)
 # Set machine name
 var1="addcs"
 # Infos
@@ -1305,8 +1303,9 @@ ConfRSYNCSysVol
 ConfNTPClient
 GoReboot
 ;;
-
-5) # File server          (FILE)
+#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#
+# If Choice is :  # File server (FILE)  #
+5)
 # Set machine name
 var1="file"
 # Infos
@@ -1328,8 +1327,9 @@ ConfDIRECTORYCommon
 ConfNTPClient
 GoReboot
 ;;
-
-6) # User machine         (USER)
+#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#
+# If Choice is : User machine (USER)  #
+6)
 printf "${Purple}Name of the machine (ex: GuiGos123) in a single block without spaces or symbols:${ResetColor}\n"
 read var1 # FixNAME
 # Check the input value contains the alphabet and number only
@@ -1360,19 +1360,19 @@ ConfCOMMON
 ConfNTPClient
 GoReboot
 ;;
-
-# Exit
+#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#
+# If Choice is :   Exit
 q)
 exit 0
 ;;
-
-# Other
+#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#
+# If Choice is :   Other caracters
 *)
 printf "${Red}Input error, please restart the script $0 ${ResetColor}\n"
 exit 1
 ;;
 esac
-
+#########################################
 
 
 
