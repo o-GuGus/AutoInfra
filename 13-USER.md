@@ -5,7 +5,7 @@ USER
 
 Questions 
 
-Demande du nom de la machine 
+> Demande du nom de la machine 
 
 Configuration des raccourcis "ll & nn" 
 Configuration du PATH sbin #
