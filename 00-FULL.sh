@@ -45,30 +45,28 @@ printf "██████  ██    ██      ██████  ██    
 function HowTo {
 printf "${Cyan}%s${ResetColor}\n"       "This script is planned for Debian 10 Buster"
 printf "${Cyan}%s${ResetColor}\n\n"     "You must have fixed the IP adress of machines before continuing"
-
 printf "${Cyan}%s${ResetColor}\n"       "Here is an example of functional infrastructure:"
-printf "${Cyan}%s${ResetColor}\n"     "###########################################################"
-printf "${Cyan}%s${ResetColor}\n"       "> Name serveur one	> NS1		> 192.168.1.201"
-printf "${Cyan}%s${ResetColor}\n"       "> Name serveur two	> NS2		> 192.168.1.202"
-printf "${Cyan}%s${ResetColor}\n"       "> Primary AD server	> ADDCP		> 192.168.1.203"
-printf "${Cyan}%s${ResetColor}\n"       "> Secondary AD server	> ADDCS		> 192.168.1.204"
-printf "${Cyan}%s${ResetColor}\n\n"     "> File server		> FILE		> 192.168.1.205"
-
-printf "${Cyan}%s${ResetColor}\n"       "> User machine 1	> USER1		> 192.168.1.101"
-printf "${Cyan}%s${ResetColor}\n\n"     "> User machine 2	> USER2		> 192.168.1.102"
-
-printf "${Cyan}%s${ResetColor}\n"       "> Subnet Mask network	> MASK		> 255.255.255.0 /24"
-printf "${Cyan}%s${ResetColor}\n"       "> Gateway of router	> GATEWAY	> 192.168.1.1"
-printf "${Cyan}%s${ResetColor}\n\n"     "###########################################################"
-
+printf "${Cyan}%s${ResetColor}\n" "+----------------------+--------+---------------+"
+printf "${Cyan}%s${ResetColor}\n" "|       EQUIPMENT      |  NAME  |    IP ADDRESS |"
+printf "${Cyan}%s${ResetColor}\n" "+----------------------+--------+---------------+"
+printf "${Cyan}%s${ResetColor}\n" "| Name server one      |   NS1  | 192.168.1.201 |"
+printf "${Cyan}%s${ResetColor}\n" "| Name server two      |   NS2  | 192.168.1.202 |"
+printf "${Cyan}%s${ResetColor}\n" "| Primary AD server    |  ADDCP | 192.168.1.203 |"
+printf "${Cyan}%s${ResetColor}\n" "| Secondary AD server  |  ADDCS | 192.168.1.204 |"
+printf "${Cyan}%s${ResetColor}\n" "| File server          |  FILE  | 192.168.1.205 |"
+printf "${Cyan}%s${ResetColor}\n" "+----------------------+--------+---------------+"
+printf "${Cyan}%s${ResetColor}\n" "| User machine 1       |  USER1 | 192.168.1.101 |"
+printf "${Cyan}%s${ResetColor}\n" "| User machine 2       |  USER2 | 192.168.1.102 |"
+printf "${Cyan}%s${ResetColor}\n" "+----------------------+--------+---------------+"
+printf "${Cyan}%s${ResetColor}\n" "| Subnet mask network  |   MASK | 255.255.255.0 |"
+printf "${Cyan}%s${ResetColor}\n" "| Gateway of router    | GATEWAY| 192.168.1.1   |"
+printf "${Cyan}%s${ResetColor}\n\n" "+----------------------+--------+---------------+"
 printf "${Cyan}%s${ResetColor}\n\n"     "For more information, please follow this link 'https://raw.githubusercontent.com/o-GuGus/AutoInfra/master/infra.md'"
 }
 
-
-######################################################################
+################################################################################
 # check sudo or root perms #
-
-function RootorUser {
+function RootOrUser {
 	Name=$(whoami)
 	printf "${Blue}%s${ResetColor}\n" "Hello '$Name' We will test if you have sudo or root permissions"
 	if [ $Name != "root" ]; then
@@ -91,168 +89,10 @@ if [ $Name != "root" ]; then
 exit 0
 fi
 }
+################################################################################
 
-
-######################################################################
-# Choice menu for deployement #
-
-function ChoiceMenu {
-printf "${Yellow}Which server/user do you want to deploy:${ResetColor}\n"
-printf "${Yellow}1) ${Cyan}Name serveur one     (NS1)${ResetColor}\n"
-printf "${Yellow}2) ${Cyan}Name serveur two     (NS2)${ResetColor}\n"
-printf "${Yellow}3) ${Cyan}Primary AD server    (ADDCP)${ResetColor}\n"
-printf "${Yellow}4) ${Cyan}Secondary AD server  (ADDCS)${ResetColor}\n"
-printf "${Yellow}5) ${Cyan}File server          (FILE)${ResetColor}\n"
-printf "${Yellow}6) ${Cyan}User machine         (USER)${ResetColor}\n"
-printf "${Yellow}q) ${Cyan}For Exit                   ${ResetColor}\n\n"
-
-read choice
-case $choice in
-
-1) # Name serveur one     (NS1)
-var1="ns1"; printf "${Green}Installation of ${Purple}> Name serveur one (NS1) < ${Green}is starting ${ResetColor}\n\n" # FixNAME 
-SetDATA
-ConfSHORTS
-ConfPATH
-ConfSSH
-ConfNETWORK
-ConfHOSTS
-ConfHOSTNAME
-ConfSOURCES
-GoUPDATES
-ConfSSL
-ConfWEBMIN
-ConfBIND9
-ConfNTPClient
-GoReboot
-;;
-
-2) # Name serveur two     (NS2)
-var1="ns2"; printf "${Green}Installation of ${Purple}> Name serveur two (NS2) < ${Green}is starting ${ResetColor}\n\n" # FixNAME 
-SetDATA
-ConfSHORTS
-ConfPATH
-ConfSSH
-ConfNETWORK
-ConfHOSTS
-ConfHOSTNAME
-ConfSOURCES
-GoUPDATES
-ConfSSL
-ConfWEBMIN
-ConfBIND9
-ConfNTPClient
-GoReboot
-;;
-
-3) # Primary AD server    (ADDCP)
-var1="addcp"; printf "${Green}Installation of ${Purple}> Primary AD server (ADDCP) < ${Green}is starting ${ResetColor}\n\n" # FixNAME 
-SetDATA
-ConfSHORTS
-ConfPATH
-ConfSSH
-ConfNETWORK
-ConfHOSTS
-ConfHOSTNAME
-ConfSOURCES
-GoUPDATES
-ConfSSL
-ConfWEBMIN
-ConfSAMBA4AD
-ConfRSYNCSysVol
-ConfNTPServer
-GoReboot
-;;
-
-
-4) # Secondary AD server  (ADDCS)
-var1="addcs"; printf "${Green}Installation of ${Purple}> Secondary AD server (ADDCS) < ${Green}is starting ${ResetColor}\n\n" # FixNAME 
-SetDATA
-ConfSHORTS
-ConfPATH
-ConfSSH
-ConfNETWORK
-ConfHOSTS
-ConfHOSTNAME
-ConfSOURCES
-GoUPDATES
-ConfSSL
-ConfWEBMIN
-ConfSAMBA4AD
-ConfRSYNCSysVol
-ConfNTPClient
-GoReboot
-;;
-
-5) # File server          (FILE)
-var1="file"; printf "${Green}Installation of ${Purple}> File server (FILE) < ${Green}is starting ${ResetColor}\n\n" # FixNAME 
-SetDATA
-ConfSHORTS
-ConfPATH
-ConfSSH
-ConfNETWORK
-ConfHOSTS
-ConfHOSTNAME
-ConfSOURCES
-GoUPDATES
-ConfSSL
-ConfWEBMIN
-ConfFILEServer
-ConfDIRECTORYCommon
-ConfNTPClient
-GoReboot
-;;
-
-6) # User machine         (USER)
-printf "${Purple}Name of the machine (ex: GuiGos123) in a single block without spaces or symbols:${ResetColor}\n"
-read var1 # FixNAME
-# Check the input value contains the alphabet and number only
-valid='[:alnum:]'
-while [[ "$var1" =~ [^$valid] ]]; do
-	printf "${Red}Enter a machine Name with contains alphabet and number only:${ResetColor}\n"
-	read var1 # FixNAME
-	done
-# set definitive Name of machine
-var1="user-$var1"
-printf "${Green}Your machine Name is ${Purple}$var1 ${ResetColor}\n\n"
-# data
-SetDATA
-# base
-ConfSHORTS
-ConfPATH
-ConfSSH
-ConfNETWORK
-ConfHOSTS
-ConfHOSTNAME
-ConfSOURCES
-GoUPDATES
-# specific functions for this machine
-JoinDOMAIN
-JoinFILE
-ConfENVGra
-ConfCOMMON
-ConfNTPClient
-GoReboot
-;;
-
-# Exit
-q)
-exit 0
-;;
-
-# Other
-*)
-printf "${Red}Input error, please restart the script $0 ${ResetColor}\n"
-exit 1
-;;
-esac
-}
-
-
-
-######################################################################
+################################################################################
 # Questions #
-
 function SetDATA {
 
 printf "${Red}Please type answers in lowercase${ResetColor}\n\n"
@@ -1345,20 +1185,197 @@ sleep 1
 systemctl reboot
 }
 
-
-#########
-#########       POUR CONTINUER IL FAUT COMPARER ADDCP ET ADDCS 
-#########    
-
-
+################################################################
 ################################################################
 #  MAIN SCRIPT START HERE
 ################################################################
-
+################################################################
+# Banners 
 BANNER
+#
+RootOrUser
+#
 HowTo
-RootorUser
-ChoiceMenu
+###############################
+# Choice menu for deployement #
+printf "${Yellow}%s${ResetColor}\n"                             "Which server/user do you want to deploy:"
+printf "${Yellow}%-4s ${Cyan}%-20s %s${ResetColor}\n"           "1)" "Name serveur one" "(NS1)"
+printf "${Yellow}%-4s ${Cyan}%-20s %s${ResetColor}\n"           "2)" "Name serveur two" "(NS2)"
+printf "${Yellow}%-4s ${Cyan}%-20s %s${ResetColor}\n"           "3)" "Primary AD server" "(ADDCP)"
+printf "${Yellow}%-4s ${Cyan}%-20s %s${ResetColor}\n"           "4)" "Secondary AD server" "(ADDCS)"
+printf "${Yellow}%-4s ${Cyan}%-20s %s${ResetColor}\n"           "5)" "File server" "(FILE)"
+printf "${Yellow}%-4s ${Cyan}%-20s %s${ResetColor}\n"           "6)" "User machine" "(USER)"
+printf "${Yellow}%-4s ${Cyan}%-20s${ResetColor}\n\n"            "q)" "For Exit"
+read -r choice
+case $choice in
+###############################
+
+#########################################
+# If Choice is : Name serveur one (NS1) #
+1)
+# Set machine name
+var1="ns1"
+# Infos
+printf "${Green}%s ${Cyan}%s ${Green}%s${ResetColor}\n\n"       "Installation of" "Name serveur one (NS1)" "is starting..."
+# Functions
+SetDATA
+ConfSHORTS
+ConfPATH
+ConfSSH
+ConfNETWORK
+ConfHOSTS
+ConfHOSTNAME
+ConfSOURCES
+GoUPDATES
+ConfSSL
+ConfWEBMIN
+ConfBIND9
+ConfNTPClient
+GoReboot
+;;
+#########################################
+
+#########################################
+# If Choice is : Name serveur two (NS2) #
+2)
+# Set machine name
+var1="ns2"
+# Infos
+printf "${Green}%s ${Cyan}%s ${Green}%s${ResetColor}\n\n"       "Installation of" "Name serveur two (NS2)" "is starting..."
+# Functions
+SetDATA
+ConfSHORTS
+ConfPATH
+ConfSSH
+ConfNETWORK
+ConfHOSTS
+ConfHOSTNAME
+ConfSOURCES
+GoUPDATES
+ConfSSL
+ConfWEBMIN
+ConfBIND9
+ConfNTPClient
+GoReboot
+;;
+
+3) # Primary AD server    (ADDCP)
+# Set machine name
+var1="addcp"
+# Infos
+printf "${Green}%s ${Cyan}%s ${Green}%s${ResetColor}\n\n"       "Installation of" "Primary AD server (ADDCP)" "is starting..."
+# Functions
+SetDATA
+ConfSHORTS
+ConfPATH
+ConfSSH
+ConfNETWORK
+ConfHOSTS
+ConfHOSTNAME
+ConfSOURCES
+GoUPDATES
+ConfSSL
+ConfWEBMIN
+ConfSAMBA4AD
+ConfRSYNCSysVol
+ConfNTPServer
+GoReboot
+;;
+
+
+4) # Secondary AD server  (ADDCS)
+# Set machine name
+var1="addcs"
+# Infos
+printf "${Green}%s ${Cyan}%s ${Green}%s${ResetColor}\n\n"       "Installation of" "Secondary AD server (ADDCS)" "is starting..."
+# Functions
+SetDATA
+ConfSHORTS
+ConfPATH
+ConfSSH
+ConfNETWORK
+ConfHOSTS
+ConfHOSTNAME
+ConfSOURCES
+GoUPDATES
+ConfSSL
+ConfWEBMIN
+ConfSAMBA4AD
+ConfRSYNCSysVol
+ConfNTPClient
+GoReboot
+;;
+
+5) # File server          (FILE)
+# Set machine name
+var1="file"
+# Infos
+printf "${Green}%s ${Cyan}%s ${Green}%s${ResetColor}\n\n"       "Installation of" "File server (FILE)" "is starting..."
+# Functions
+SetDATA
+ConfSHORTS
+ConfPATH
+ConfSSH
+ConfNETWORK
+ConfHOSTS
+ConfHOSTNAME
+ConfSOURCES
+GoUPDATES
+ConfSSL
+ConfWEBMIN
+ConfFILEServer
+ConfDIRECTORYCommon
+ConfNTPClient
+GoReboot
+;;
+
+6) # User machine         (USER)
+printf "${Purple}Name of the machine (ex: GuiGos123) in a single block without spaces or symbols:${ResetColor}\n"
+read var1 # FixNAME
+# Check the input value contains the alphabet and number only
+valid='[:alnum:]'
+while [[ "$var1" =~ [^$valid] ]]; do
+	printf "${Red}Enter a machine Name with contains alphabet and number only:${ResetColor}\n"
+	read var1 # FixNAME
+	done
+# set definitive Name of machine
+var1="user-$var1"
+printf "${Green}Your machine Name is ${Purple}$var1 ${ResetColor}\n\n"
+# data
+SetDATA
+# base
+ConfSHORTS
+ConfPATH
+ConfSSH
+ConfNETWORK
+ConfHOSTS
+ConfHOSTNAME
+ConfSOURCES
+GoUPDATES
+# specific functions for this machine
+JoinDOMAIN
+JoinFILE
+ConfENVGra
+ConfCOMMON
+ConfNTPClient
+GoReboot
+;;
+
+# Exit
+q)
+exit 0
+;;
+
+# Other
+*)
+printf "${Red}Input error, please restart the script $0 ${ResetColor}\n"
+exit 1
+;;
+esac
+
+
+
+
 
 # enable ssh login for root user ?! #
 printf "\n${Yellow}Do you want to enable ssh login for root user ?! (Y/N)${ResetColor}\n"
