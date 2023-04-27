@@ -1,11 +1,11 @@
-## Workflow for configuring a USER machine
+# Workflow for configuring a USER machine
 
-# Banner, permissions and explanations
+## Banner, permissions and explanations
 'BANNER'
 'RootOrUser'
 'HowTo'
 
-# Base for all machines
+## Base for all machines
 1. 'SetDATA' Requests for machine parameters
 > ip, ip, ip
 2. 'ConfSHORTS' Configuration of "ll & nn" hotkeys
@@ -17,7 +17,7 @@
 8. 'ConfSOURCES' Configuring the sources.list file
 9. 'GoUPDATES' Launch of updates
 
-# Specifics functions for this machine
+## Specifics functions for this machine
 JoinDOMAIN
 JoinFILE
 ConfENVGra
