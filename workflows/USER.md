@@ -9,20 +9,28 @@
 1. 'SetDATA'
 - Requests for machine parameters
 > ip, ip, ip
+
 2. ConfSHORTS
 - Configuration of "ll & nn" hotkeys
+
 3. 'ConfPATH'
 - Configuring the sbin PATH
+
 4. 'ConfSSH'
 - Configuring SSH for root login
+
 5. 'ConfNETWORK'
 - Network Setup
+
 6. 'ConfHOSTS'
 - Configuring the HOSTS file
+
 7. 'ConfHOSTNAME'
 - Configuring the HOSTNAME
+
 8. 'ConfSOURCES'
 - Configuring the sources.list file
+
 9. 'GoUPDATES'
 - Launch of updates
 
