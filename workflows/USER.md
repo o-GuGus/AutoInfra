@@ -6,11 +6,11 @@ Issues
 
 Configuration of "ll & nn" hotkeys
 
-Configuring the sbin PATH
+1. Configuring the sbin PATH
 
-Configuring SSH for root login
+2. Configuring SSH for root login
 
-NETWORK Setup
+3. NETWORK Setup
 
 Configuring the HOSTS file
 
