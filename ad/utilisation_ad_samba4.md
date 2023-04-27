@@ -9,7 +9,7 @@ samba-tool user create your_domain_user
 > 2. Pour ajouter un utilisateur avec plusieurs champs importants requis par AD, utilisez la syntaxe suivante:
 ~~~shell
 samba-tool user add -h  
-samba-tool user add your_domain_user --given-name=your_name --surname=your_username --mail-address=your_domain_user@gugus.ovh --login-shell=/bin/bash
+samba-tool user add your_domain_user --given-name=your_name --surname=your_username --mail-address=your_domain_user@domain.tld --login-shell=/bin/bash
 ~~~
 
 > 3. Une liste de tous les utilisateurs du domaine Samba AD peut être obtenue en exécutant la commande suivante:
@@ -80,7 +80,7 @@ wbinfo -i your_domain_user
 > 15. Outre l'utilitaire wbinfo, vous pouvez également utiliser l'utilitaire de ligne de commande getent pour interroger la base de données Active Directory à partir des bibliothèques de commutateur de service de noms qui sont représentées dans le fichier /etc/nsswitch.conf.
 Faites passer la commande getent à travers un filtre grep afin de restreindre les résultats concernant uniquement votre base de données d'utilisateurs ou de groupes de domaine AD:
 ~~~shell
-getent passwd | grep GUGUS
-getent group | grep GUGUS
+getent passwd | grep DOMAIN
+getent group | grep DOMAIN
 ~~~
 

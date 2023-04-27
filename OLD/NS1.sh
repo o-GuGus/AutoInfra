@@ -1,6 +1,6 @@
-#/bin/bash
+#!/bin/bash
 ################################################################
-#  FICHIERS
+#  NS1
 ################################################################
 #
 # Version 1.0 - 2020-09-28
@@ -26,11 +26,11 @@ echo "\e[30m"
 ######################################################################
 # Fixation du nom de la machine #
 
-var1="fichiers"
+var1="ns1"
 echo "_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_"
 echo "_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_"
 echo "_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_"
-echo "\e[1;34m\nInstallation du Serveur de fichiers Samba4 (FICHIERS)\n\e[1;30m"
+echo "\e[1;34m\nInstallation du Serveur Name Serveur #1 (NS1)\n\e[1;30m"
 echo "_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_"
 echo "_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_"
 echo "_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_"
@@ -48,12 +48,13 @@ echo "\nNom du domaine (ex: gugus.ovh) :\n"
 read var0
 #echo "\nNom de la machine (ex: ns1,ns2,addcp,addcs,fichiers) :\n"
 #read var1
-echo "\nAdresse IP de la machine (ex: 172.162.99.15) :\n"
+echo "\nAdresse IP de la machine (ex: 172.162.99.11) :\n"
 read var2
 #echo "\nNom du serveur Active Directory :\n"
 #read var3
-echo "\nAdresse IP du serveur DNS Primaire (ns1) (ex: 172.162.99.11) :\n"
-read var4
+#echo "\nAdresse IP du serveur DNS Primaire (ns1) (ex: 172.162.99.11) :\n"
+#read var4
+var4="$var2"
 echo "\nAdresse IP du serveur DNS Secondaire (ns2) (ex: 172.162.99.12) :\n"
 read var5
 #echo  "\nLogin administrateur du domaine :\n"
@@ -62,8 +63,8 @@ read var5
 #read var9
 #echo "Nom du groupe utilisateur du domaine :\n"
 #read var10
-echo  "\nNom du dossier partage commun SMB :\n"
-read var11
+#echo  "\nNom du dossier partage commun SMB :\n"
+#read var11
 echo  "\nMasque de sous reseau (ex: 255.255.0.0) :\n"
 read var12
 echo  "\nPasserelle du reseau (ex: 172.162.1.1) :\n"
@@ -72,14 +73,14 @@ echo  "\nInterface ethernet (ex: ens192 ou eth0) :\n"
 read var14
 echo  "\nAdresse IP du serveur ADDCP (ex: 172.162.99.13) :\n"
 read var15
-#echo  "\nAdresse IP du serveur ADDCS (ex: 172.162.99.14) :\n"
-#read var16
-echo  "\nMot de passe [administrator] kerberos 'majuscule,minuscule,chiffre,symbole' :\n"
-read var17
-#echo "\nNAdresse IP du serveur FICHIERS (ex: 172.162.99.15) :\n"
-#read var19
-echo  "\nMot de passe 'root' pour le serveur 'ADDCP' \n"
-read var20
+echo  "\nAdresse IP du serveur ADDCS (ex: 172.162.99.14) :\n"
+read var16
+#echo  "\nMot de passe [administrator] kerberos 'majuscule,minuscule,chiffre,symbole' :\n"
+#read var17
+echo "\nNAdresse IP du serveur FICHIERS (ex: 172.162.99.15) :\n"
+read var19
+#echo  "\nMot de passe 'root' pour le serveur 'ADDCP' \n"
+#read var20
 
 # Nom netbios #
 var7=`echo $var0 |cut -d. -f 1`
@@ -107,16 +108,16 @@ echo "Nom NETBIOS : $var7"
 echo "Domaine en majuscule : $var8"
 #echo "Description du serveur Samba : $var9"
 #echo "Nom du groupe utilisateur du domaine : $var10"
-echo "Nom du dossier partage commun SMB : $var11"
+#echo "Nom du dossier partage commun SMB : $var11"
 echo "Masque de sous réseau : $var12"
 echo "Passerelle du reseau : $var13"
 echo "Interface ethernet : $var14"
 echo "Adresse IP du srv ADDCP : $var15"
-#echo "Adresse IP du srv ADDCS : $var16"
-echo "Mot de passe administrator : $var17"
+echo "Adresse IP du srv ADDCS : $var16"
+#echo "Mot de passe administrator : $var17"
 echo "Hostname en majuscule : $var18"
-#echo "Adresse IP du srv FICHIERS : $var19"
-echo "Mot de passe root ADDCP : $var20"
+echo "Adresse IP du srv FICHIERS : $var19"
+#echo "Mot de passe root ADDCP : $var20"
 
 # Les informations sont elles correctes #
 echo  "\n\n\e[1;31mLes information saisies sont elles correctes ? (Y/N)\n"
@@ -212,8 +213,6 @@ iface $var14 inet static
         address $var2
         netmask $var12
         gateway $var13
-#adresse ip srv dns ADDCP
-        #dns-nameservers $var15
 #adresse ip srv dns primaire
         dns-nameservers $var4
 #adresse ip srv dns secondaire
@@ -390,291 +389,203 @@ sleep 3
 
 
 ######################################################################
-# Configuration du serveur de fichiers SAMBA 4 #
+# Configuration de BIND9 #
 
-echo  "\e[1;34m\nConfiguration du serveur de $var18 SAMBA 4\n\e[1;30m"
 
-##############
-# /etc/fstab #
-##############
+##########################
+# Configuration de BIND9 #
+#     Config pour NS1    #
+##########################
 
-cp /etc/fstab  /etc/fstab.old
-# recuperation de l'UUID de la partition principale
-UUID=`cat /etc/fstab | grep ext4 | awk -F/ '{print $1}'`
-# suppression de la ligne / ext4 partiton principale
-sed -i".bak" '/ext4/d' /etc/fstab
-# creation de la ligne / ext4 partition principale avec les nouveaux attributs
-echo "$UUID    /    ext4    noatime,nodiratime,user_xattr,acl,errors=remount-ro    0    1" >> /etc/fstab
 
-echo  "\e[1;32m\nConfiguration de FSTAB 'OK'\n\e[1;30m"
+apt install -y bind9 bind9utils bind9-doc
+systemctl enable bind9
+systemctl start bind9
 
-echo  "\e[1;31m\nPlusieurs fenetres vont apparaitre, tapez simplement sur 'entree' a chaque fois\n\e[1;30m"
-sleep 20
 
-# installation des paquets pour samba4
-apt install -y samba krb5-user krb5-config winbind libpam-winbind libnss-winbind acl
+##### /etc/bind/named.conf #####
+cp /etc/bind/named.conf /etc/bind/named.conf.old
+cat <<EOF > /etc/bind/named.conf
+// This is the primary configuration file for the BIND DNS server named.
+//
+// Please read /usr/share/doc/bind9/README.Debian.gz for information on the
+// structure of BIND configuration files in Debian, *BEFORE* you customize
+// this configuration file.
+//
+// If you are just adding zones, please do that in /etc/bind/named.conf.local
 
-echo  "\e[1;32m\nInstallation des paquets 'OK'\n\e[1;30m"
-
-##################
-# /etc/krb5.conf #
-##################
-
-cp /etc/krb5.conf /etc/krb5.conf.old
-cat <<EOF > /etc/krb5.conf
-[libdefaults]
-	default_realm = $var8
-    dns_lookup_realm = false
-    dns_lookup_kdc = true
-
-# The following krb5.conf variables are only for MIT Kerberos.
-	kdc_timesync = 1
-	ccache_type = 4
-	forwardable = true
-	proxiable = true
-
-# The following encryption type specification will be used by MIT Kerberos
-# if uncommented.  In general, the defaults in the MIT Kerberos code are
-# correct and overriding these specifications only serves to disable new
-# encryption types as they are added, creating interoperability problems.
-#
-# The only time when you might need to uncomment these lines and change
-# the enctypes is if you have local software that will break on ticket
-# caches containing ticket encryption types it doesn't know about (such as
-# old versions of Sun Java).
-
-#	default_tgs_enctypes = des3-hmac-sha1
-#	default_tkt_enctypes = des3-hmac-sha1
-#	permitted_enctypes = des3-hmac-sha1
-
-# The following libdefaults parameters are only for Heimdal Kerberos.
-	fcc-mit-ticketflags = true
-
-[realms]
-	$var8 = {
-		kdc = $var0
-		admin_server = $var0
-	}
-
-[domain_realm]
-		.$var0 = $var8
-		$var0 = $var8
+include "/etc/bind/named.conf.options";
+include "/etc/bind/named.conf.local";
+include "/etc/bind/named.conf.default-zones";
+server $var5 {
+        };
 EOF
+##### /etc/bind/named.conf #####
 
-echo  "\e[1;32m\nConfiguration KERBEROS 'OK'\n\e[1;30m"
 
-####################################################################
-# Configuration du serveur de fichiers SAMBA 4 /etc/samba/smb.conf #
-####################################################################
+##### /etc/bind/named.conf.options #####
+cp /etc/bind/named.conf.options /etc/bind/named.conf.options.old
+cat <<EOF > /etc/bind/named.conf.options
+options {
+        directory "/var/cache/bind";
 
-cp /etc/samba/smb.conf /etc/samba/smb.conf.old1
-cat <<EOF > /etc/samba/smb.conf
-# Global parameters
-[global]
-  netbios name = $var18
-  workgroup = $var7
-  realm = $var8
-  security = ADS
-    dns forwarder = $var4,$var5
+        // If there is a firewall between you and nameservers you want
+        // to talk to, you may need to fix the firewall to allow multiple
+        // ports to talk.  See http://www.kb.cert.org/vuls/id/800113
 
-  # idmap config
-  idmap config * : backend = tdb
-  idmap config * : range = 50000-1000000
+        // If your ISP provided one or more IP addresses for stable
+        // nameservers, you probably want to use them as forwarders.
+        // Uncomment the following block, and insert the addresses replacing
+        // the all-0's placeholder.
 
-# logs
-log file = /var/log/samba/%m.log
-log level = 1
+        // forwarders {
+        //      0.0.0.0;
+        // };
 
-# acl
-vfs objects = acl_xattr
-map acl inherit = yes
-store dos attributes = yes
+        //========================================================================
+        // If BIND logs error messages about the root key being expired,
+        // you will need to update your keys.  See https://www.isc.org/bind-keys
+        //========================================================================
+        dnssec-validation auto;
 
-# template homedir & shell
-template homedir = /home/%D/%U
-template shell = /bin/bash
-
-# winbind
-winbind use default domain = yes
-winbind offline logon = false
-winbind nss info = rfc2307
-winbind enum users = yes
-winbind enum groups = yes
-
-  # Desactiver les connections null session
-  restrict anonymous = 2
-
-  # Desactiver NetBIOS
-  disable netbios = yes
-
-  # Desactiver le support des imprimantes
-  printcap name = /dev/null
-  load printers = no
-  disable spoolss = yes
-  printing = bsd
-
-  # Generer des hashes de mot de passe supplementaires
-  password hash userPassword schemes = CryptSHA256 CryptSHA512
-
-  # Desactiver NTLMv1
-  ntlm auth = mschapv2-and-ntlmv2-only
-
-    # kerberos
-    dedicated keytab file = /etc/krb5.keytab
-    kerberos method = secrets and keytab
-
-    # username map
-    username map = /etc/samba/user.map
-
-  # Rendre les fichiers executables
-  acl allow execute always = yes
-
-# dossiers
-    [netlogon]
-      path = /var/lib/samba/sysvol/$var0/scripts
-      read only = No
-
-    [sysvol]
-      path = /var/lib/samba/sysvol
-      read only = No
+        listen-on-v6 { any; };
+        forwarders {
+                $var13;
+                8.8.8.8;
+                };
+};
 EOF
+##### /etc/bind/named.conf.options #####
 
-# mapper l'administrateur de domaine sur le compte root local
-cat <<EOF > /etc/samba/user.map
-!root = $var7\administrator
+
+##### /etc/bind/named.conf.local #####
+##### cut de l'ip du srv aux 3 premiers blocs, exemple 192.168.0
+ipcut=`echo $var2 |cut -d. -f 1,2,3`
+##### retournement du cut de l'ip du srv, exemple 0.168.192
+ipcutrev=`echo $var2 | awk -F. '{print $3"."$2"."$1}'`
+#########
+cp /etc/bind/named.conf.local /etc/bind/named.conf.local.old
+cat <<EOF > /etc/bind/named.conf.local
+//
+// Do any local configuration here
+//
+
+// Consider adding the 1918 zones here, if they are not used in your
+// organization
+//include "/etc/bind/zones.rfc1918";
+
+zone "$var0" {
+        type master;
+        file "/var/lib/bind/$var0.hosts";
+        };
+zone "$ipcutrev.in-addr.arpa" {
+        type master;
+        file "/var/lib/bind/$ipcut.rev";
+        };
 EOF
+##### /etc/bind/named.conf.local #####
 
-# reboot de samba 4
-smbcontrol all reload-config
 
-# Gestion des services
-systemctl mask samba-ad-dc.service
-systemctl stop samba-ad-dc.service
-systemctl unmask smbd nmbd winbind
-systemctl enable smbd nmbd winbind
-
-echo  "\e[1;32m\nConfiguration de /etc/samba/smb.conf 'OK'\n\e[1;33m"
-
-#####################################
-# Jonction de la machine au domaine #
-#####################################
-
-# Jonction de la machine au domaine
-net ads join -U administrator%$var17
-echo  "\e[1;32m\nJonction au domaine $var7 'OK'\n\e[1;33m"
-
-echo "$var17" | kinit administrator@$var8
-echo  "\e[1;34m\n\nVoici les informations de votre Kerberos\n\e[1;33m"
-klist
-
-systemctl restart smbd nmbd winbind
-
-####################
-# NSS login system #
-####################
-
-# pour pouvoir authentifier et ouvrir une session ad sur le systeme local
-cp /etc/nsswitch.conf /etc/nsswitch.conf.old
-cat <<EOF > /etc/nsswitch.conf
-# /etc/nsswitch.conf
-#
-# Example configuration of GNU Name Service Switch functionality.
-# If you have the 'glibc-doc-reference' and 'info' packages installed, try:
-# 'info libc Name Service Switch' for information about this file.
-
-passwd:         compat winbind
-group:          compat winbind
-shadow:         compat winbind
-gshadow:        files
-
-hosts:          files dns
-networks:       files
-
-protocols:      db files
-services:       db files
-ethers:         db files
-rpc:            db files
-
-netgroup:       nis
+##### /var/lib/bind/$var0.hosts #####
+cat <<EOF > /var/lib/bind/$var0.hosts
+\$ttl 38400
+$var0.      IN      SOA     $var1.$var0. admin.$var0. (
+                        1595498695   ; serial
+                        10800        ; refresh
+                        3600         ; retry
+                        604800       ; expiry
+                        38400 )      ; minimum
+;
+; global
+;
+$var0.           IN      NS     addcp.$var0.
+$var0.           IN      A      $var15
+                 IN      NS     addcp
+                 IN      A      $var15
+addcp             IN      A      $var15
+gc._msdcs        IN      A      $var15
+;
+; other srv
+;
+ns1.$var0.          IN      A     $var4
+ns2.$var0.          IN      A     $var5
+addcp.$var0.         IN      A     $var15
+addcs.$var0.          IN      A     $var16
+fichiers.$var0.          IN      A     $var19
+;
+; global catalog servers
+;
+_gc._tcp                                                IN SRV 0 100 3268       addcp
+_gc._tcp.Default-First-Site-Name._sites                 IN SRV 0 100 3268       addcp
+_ldap._tcp.gc._msdcs                                    IN SRV 0 100 3268       addcp
+_ldap._tcp.Default-First-Site-Name._sites.gc._msdcs     IN SRV 0 100 3268       addcp
+;
+; ldap servers
+;
+_ldap._tcp                                              IN SRV 0 100 389     addcp
+_ldap._tcp.dc._msdcs                                    IN SRV 0 100 389     addcp
+_ldap._tcp.pdc._msdcs                                   IN SRV 0 100 389     addcp
+_ldap._tcp.Default-First-Site-Name._sites               IN SRV 0 100 389     addcp
+_ldap._tcp.Default-First-Site-Name._sites.dc._msdcs     IN SRV 0 100 389     addcp
+;
+; krb5 servers
+;
+_kerberos._tcp                                              IN SRV 0 100 88     addcp
+_kerberos._tcp.dc._msdcs                                    IN SRV 0 100 88     addcp
+_kerberos._tcp.Default-First-Site-Name._sites               IN SRV 0 100 88     addcp
+_kerberos._tcp.Default-First-Site-Name._sites.dc._msdcs     IN SRV 0 100 88     addcp
+_kerberos._udp                                              IN SRV 0 100 88     addcp
+;
+; MIT kpasswd likes to lookup this name on password change
+;
+_kerberos-master._tcp        IN SRV 0 100 88     addcp
+_kerberos-master._udp        IN SRV 0 100 88     addcp
+;
+; kpasswd
+;
+_kpasswd._tcp           IN SRV 0 100 464     addcp
+_kpasswd._udp           IN SRV 0 100 464     addcp
+;
+; heimdal 'find realm for host' hack
+;
+_kerberos               IN TXT     $var8
+;
 EOF
-echo  "\e[1;32m\nConfiguration du NSS 'OK'\n\e[1;30m"
+##### /var/lib/bind/$var0.hosts #####
 
-# creer automatiquement le (home directory) pour les utilisateurs de domaine authentifies
-pam-auth-update --enable mkhomedir
-echo "session    required    pam_mkhomedir.so    skel=/etc/skel/    umask=0022" >> /etc/pam.d/common-account
-echo  "\e[1;32m\nHome directory a la connexion 'OK'\n\e[1;30m"
 
-# suppression de "try_authtok"
-# les utilisateurs authentifies localement sur linux ne peuvent pas modifier leur mot de passe depuis la console
-cp /etc/pam.d/common-password /etc/pam.d/common-password.old
-cat <<EOF > /etc/pam.d/common-password
-#
-# /etc/pam.d/common-password - password-related modules common to all services
-#
-# This file is included from other service-specific PAM config files,
-# and should contain a list of modules that define the services to be
-# used to change user passwords.  The default is pam_unix.
+##### /var/lib/bind/$ipcut.rev #####
+##### retournement de l'ip du dns primaire
+ipns1rev=`echo $var4 | awk -F. '{print $4"."$3"."$2"."$1}'`
+##### retournement de l'ip du dns secondaire
+ipns2rev=`echo $var5 | awk -F. '{print $4"."$3"."$2"."$1}'`
+##### retournement de l'ip du srv addcp
+ipaddcprev=`echo $var15 | awk -F. '{print $4"."$3"."$2"."$1}'`
+##### retournement de l'ip du srv addcs
+ipaddcsrev=`echo $var16 | awk -F. '{print $4"."$3"."$2"."$1}'`
+##### retournement de l'ip du srv fichiers
+ipfichiersrev=`echo $var19 | awk -F. '{print $4"."$3"."$2"."$1}'`
 
-# Explanation of pam_unix options:
-#
-# The "sha512" option enables salted SHA512 passwords.  Without this option,
-# the default is Unix crypt.  Prior releases used the option "md5".
-#
-# The "obscure" option replaces the old 'OBSCURE_CHECKS_ENAB' option in
-# login.defs.
-#
-# See the pam_unix manpage for other options.
-
-# As of pam 1.0.1-6, this file is managed by pam-auth-update by default.
-# To take advantage of this, it is recommended that you configure any
-# local modules either before or after the default block, and use
-# pam-auth-update to manage selection of other modules.  See
-# pam-auth-update(8) for details.
-
-# here are the per-package modules (the "Primary" block)
-password        [success=2 default=ignore]      pam_unix.so obscure sha512
-
-### ancienne ligne ###
-### password        [success=1 default=ignore]      pam_winbind.so try_authtok try_first_pass
-
-### nouvelle ligne ###
-password        [success=1 default=ignore]      pam_winbind.so try_first_pass
-
-# here's the fallback if no module succeeds
-password        requisite                       pam_deny.so
-# prime the stack with a positive return value if there isn't one already;
-# this avoids us returning an error just because nothing sets a success code
-# since the modules above will each just jump around
-password        required                        pam_permit.so
-# and here are more per-package modules (the "Additional" block)
-# end of pam-auth-update config
+cat <<EOF > /var/lib/bind/$ipcut.rev
+\$ttl 38400
+$ipcutrev.in-addr.arpa.        IN      SOA     $var1.$var0. admin.$var0. (
+                        1596472349
+                        10800
+                        3600
+                        604800
+                        38400 )
+$ipcutrev.in-addr.arpa.      IN      NS      addcp.$var0.
+$ipaddcprev.in-addr.arpa.     IN      PTR     addcp.$var0.
+$ipns1rev.in-addr.arpa.      IN      PTR     ns1.$var0.
+$ipns2rev.in-addr.arpa.      IN      PTR     ns2.$var0.
+$ipaddcsrev.in-addr.arpa.      IN      PTR     addcs.$var0.
+$ipfichiersrev.in-addr.arpa.      IN      PTR     fichiers.$var0.
 EOF
-echo  "\e[1;32m\nSuppression de try_authtok 'OK'\n\e[1;30m"
+##### /var/lib/bind/$ipcut.rev #####
 
-echo  "\e[1;34m\n\nVoici les informations des groupes actuellement presents sur le domaine\n\e[1;33m"
-wbinfo -g
+systemctl restart bind9
 
-echo  "\e[1;34m\n\nVoici la liste des utilisateurs actuellement presents sur le domaine\n\e[1;33m"
-wbinfo -u
-getent passwd | grep $var7
-
-#########################################################
-# Creation d'un répertoire de partage commun sur Samba4 #
-#########################################################
-
-mkdir /$var11
-chmod -R 775 /$var11
-chown -R root:"domain users" /$var11
-
-cp /etc/samba/smb.conf /etc/samba/smb.conf.old2
-echo "
-[$var11]
-	path = /$var11
-	read only = no" >> /etc/samba/smb.conf
-
-echo  "\e[1;32m\nCreation du dossier de partage '$var11' sur Samba4 'OK'\n\e[1;30m"
-
-echo  "\e[1;32m\nConfiguration de SAMBA 4 Serveur de FICHIERS 'OK'\n\e[1;30m"
+echo  "\e[1;32m\nConfiguration de BIND9 'OK'\n\e[1;30m"
 sleep 3
 
 

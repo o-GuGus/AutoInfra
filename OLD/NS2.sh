@@ -1,6 +1,6 @@
-#/bin/bash
+#!/bin/bash
 ################################################################
-#  NS1
+#  NS2
 ################################################################
 #
 # Version 1.0 - 2020-09-28
@@ -26,11 +26,11 @@ echo "\e[30m"
 ######################################################################
 # Fixation du nom de la machine #
 
-var1="ns1"
+var1="ns2"
 echo "_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_"
 echo "_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_"
 echo "_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_"
-echo "\e[1;34m\nInstallation du Serveur Name Serveur #1 (NS1)\n\e[1;30m"
+echo "\e[1;34m\nInstallation du Serveur Name Serveur #2 (NS2)\n\e[1;30m"
 echo "_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_"
 echo "_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_"
 echo "_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_"
@@ -47,16 +47,16 @@ echo "\e[1;32m"
 echo "\nNom du domaine (ex: gugus.ovh) :\n"
 read var0
 #echo "\nNom de la machine (ex: ns1,ns2,addcp,addcs,fichiers) :\n"
-#read var1
-echo "\nAdresse IP de la machine (ex: 172.162.99.11) :\n"
+#ead var1
+echo "\nAdresse IP de la machine (ex: 172.162.99.12) :\n"
 read var2
 #echo "\nNom du serveur Active Directory :\n"
 #read var3
-#echo "\nAdresse IP du serveur DNS Primaire (ns1) (ex: 172.162.99.11) :\n"
-#read var4
-var4="$var2"
-echo "\nAdresse IP du serveur DNS Secondaire (ns2) (ex: 172.162.99.12) :\n"
-read var5
+echo "\nAdresse IP du serveur DNS Primaire (ns1) (ex: 172.162.99.11) :\n"
+read var4
+#echo "\nAdresse IP du serveur DNS Secondaire (ns2) (ex: 172.162.99.12) :\n"
+#read var5
+var5="$var2"
 #echo  "\nLogin administrateur du domaine :\n"
 #read var6
 #echo  "\nDescription du serveur Samba :\n"
@@ -394,7 +394,7 @@ sleep 3
 
 ##########################
 # Configuration de BIND9 #
-#     Config pour NS1    #
+#     Config pour NS2    #
 ##########################
 
 
@@ -417,7 +417,7 @@ cat <<EOF > /etc/bind/named.conf
 include "/etc/bind/named.conf.options";
 include "/etc/bind/named.conf.local";
 include "/etc/bind/named.conf.default-zones";
-server $var5 {
+server $var4 {
         };
 EOF
 ##### /etc/bind/named.conf #####

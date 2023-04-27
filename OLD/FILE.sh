@@ -1,6 +1,6 @@
-#/bin/bash
+#!/bin/bash
 ################################################################
-#  ADDCS
+#  FICHIERS
 ################################################################
 #
 # Version 1.0 - 2020-09-28
@@ -26,11 +26,11 @@ echo "\e[30m"
 ######################################################################
 # Fixation du nom de la machine #
 
-var1="addcs"
+var1="fichiers"
 echo "_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_"
 echo "_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_"
 echo "_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_"
-echo "\e[1;34m\nInstallation du Serveur Samba4 AD DC Replique (ADDCS)\n\e[1;30m"
+echo "\e[1;34m\nInstallation du Serveur de fichiers Samba4 (FICHIERS)\n\e[1;30m"
 echo "_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_"
 echo "_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_"
 echo "_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_"
@@ -48,7 +48,7 @@ echo "\nNom du domaine (ex: gugus.ovh) :\n"
 read var0
 #echo "\nNom de la machine (ex: ns1,ns2,addcp,addcs,fichiers) :\n"
 #read var1
-echo "\nAdresse IP de la machine (ex: 172.162.99.14) :\n"
+echo "\nAdresse IP de la machine (ex: 172.162.99.15) :\n"
 read var2
 #echo "\nNom du serveur Active Directory :\n"
 #read var3
@@ -62,8 +62,8 @@ read var5
 #read var9
 #echo "Nom du groupe utilisateur du domaine :\n"
 #read var10
-#echo  "\nNom du dossier partage commun SMB :\n"
-#read var11
+echo  "\nNom du dossier partage commun SMB :\n"
+read var11
 echo  "\nMasque de sous reseau (ex: 255.255.0.0) :\n"
 read var12
 echo  "\nPasserelle du reseau (ex: 172.162.1.1) :\n"
@@ -107,7 +107,7 @@ echo "Nom NETBIOS : $var7"
 echo "Domaine en majuscule : $var8"
 #echo "Description du serveur Samba : $var9"
 #echo "Nom du groupe utilisateur du domaine : $var10"
-#echo "Nom du dossier partage commun SMB : $var11"
+echo "Nom du dossier partage commun SMB : $var11"
 echo "Masque de sous réseau : $var12"
 echo "Passerelle du reseau : $var13"
 echo "Interface ethernet : $var14"
@@ -213,7 +213,7 @@ iface $var14 inet static
         netmask $var12
         gateway $var13
 #adresse ip srv dns ADDCP
-        dns-nameservers $var15
+        #dns-nameservers $var15
 #adresse ip srv dns primaire
         dns-nameservers $var4
 #adresse ip srv dns secondaire
@@ -390,9 +390,9 @@ sleep 3
 
 
 ######################################################################
-# Configuration du serveur (ADDCS) SAMBA 4 AD DC Secondaire #
+# Configuration du serveur de fichiers SAMBA 4 #
 
-echo  "\e[1;34m\nConfiguration du serveur $var18 SAMBA 4 AD DC Secondaire\n\e[1;30m"
+echo  "\e[1;34m\nConfiguration du serveur de $var18 SAMBA 4\n\e[1;30m"
 
 ##############
 # /etc/fstab #
@@ -411,7 +411,7 @@ echo  "\e[1;32m\nConfiguration de FSTAB 'OK'\n\e[1;30m"
 echo  "\e[1;31m\nPlusieurs fenetres vont apparaitre, tapez simplement sur 'entree' a chaque fois\n\e[1;30m"
 sleep 20
 
-# installation des paquets pour samba4 4 AD DC
+# installation des paquets pour samba4
 apt install -y samba krb5-user krb5-config winbind libpam-winbind libnss-winbind acl
 
 echo  "\e[1;32m\nInstallation des paquets 'OK'\n\e[1;30m"
@@ -463,48 +463,23 @@ EOF
 
 echo  "\e[1;32m\nConfiguration KERBEROS 'OK'\n\e[1;30m"
 
-#####################################################################################
-# Jonction au Samba4 AD DC du srv ADDCP en tant que controleur de domaine secondaire #
-#####################################################################################
+####################################################################
+# Configuration du serveur de fichiers SAMBA 4 /etc/samba/smb.conf #
+####################################################################
 
-# arret des anciens services
-systemctl stop samba-ad-dc.service smbd.service nmbd.service winbind.service
-systemctl disable samba-ad-dc.service smbd.service nmbd.service winbind.service
-
-# deplacement de l'ancien fichier de conf Samba 4
-mv /etc/samba/smb.conf /etc/samba/smb.conf.old1
-
-# jonction au domaine samba 4 existant sur addcp
-samba-tool domain join $var0 DC -U "administrator" --password "$var17"
-
-# gestion des services
-systemctl unmask samba-ad-dc.service
-systemctl enable samba-ad-dc.service
-systemctl start samba-ad-dc.service
-
-echo  "\e[1;32m\nJonction au domaine $var7 'OK'\n\e[1;30m"
-
-echo  "\e[1;34m\nVoici les informations sur votre domaine SAMBA 4 AD DC Secondaire\n\e[1;33m"
-samba-tool domain level show
-
-echo "$var17" | kinit administrator@$var8
-echo  "\e[1;34m\n\nVoici les informations de votre Kerberos\n\e[1;33m"
-klist
-
-#######################
-# /etc/samba/smb.conf #
-#######################
-
-cp /etc/samba/smb.conf /etc/samba/smb.conf.old2
+cp /etc/samba/smb.conf /etc/samba/smb.conf.old1
 cat <<EOF > /etc/samba/smb.conf
 # Global parameters
 [global]
-    netbios name = $var18
-    workgroup = $var7
-    realm = $var8
-    server role = active directory domain controller
-    idmap_ldb:use rfc2307 = yes
-      dns forwarder = $var4,$var5
+  netbios name = $var18
+  workgroup = $var7
+  realm = $var8
+  security = ADS
+    dns forwarder = $var4,$var5
+
+  # idmap config
+  idmap config * : backend = tdb
+  idmap config * : range = 50000-1000000
 
 # logs
 log file = /var/log/samba/%m.log
@@ -526,46 +501,77 @@ winbind nss info = rfc2307
 winbind enum users = yes
 winbind enum groups = yes
 
-# Desactiver les connections null session
-restrict anonymous = 2
+  # Desactiver les connections null session
+  restrict anonymous = 2
 
-# Desactiver NetBIOS
-disable netbios = yes
+  # Desactiver NetBIOS
+  disable netbios = yes
 
-# Desactiver le support des imprimantes
-printcap name = /dev/null
-load printers = no
-disable spoolss = yes
-printing = bsd
+  # Desactiver le support des imprimantes
+  printcap name = /dev/null
+  load printers = no
+  disable spoolss = yes
+  printing = bsd
 
-# Generer des hashes de mot de passe supplementaires
-password hash userPassword schemes = CryptSHA256 CryptSHA512
+  # Generer des hashes de mot de passe supplementaires
+  password hash userPassword schemes = CryptSHA256 CryptSHA512
 
-# Desactiver NTLMv1
-ntlm auth = mschapv2-and-ntlmv2-only
+  # Desactiver NTLMv1
+  ntlm auth = mschapv2-and-ntlmv2-only
+
+    # kerberos
+    dedicated keytab file = /etc/krb5.keytab
+    kerberos method = secrets and keytab
+
+    # username map
+    username map = /etc/samba/user.map
+
+  # Rendre les fichiers executables
+  acl allow execute always = yes
 
 # dossiers
     [netlogon]
-        path = /var/lib/samba/sysvol/$var0/scripts
-        read only = No
+      path = /var/lib/samba/sysvol/$var0/scripts
+      read only = No
 
     [sysvol]
-        path = /var/lib/samba/sysvol
-        read only = No
+      path = /var/lib/samba/sysvol
+      read only = No
 EOF
 
-# reboot service samba 4 ad dc
-systemctl restart samba-ad-dc.service
+# mapper l'administrateur de domaine sur le compte root local
+cat <<EOF > /etc/samba/user.map
+!root = $var7\administrator
+EOF
 
-echo  "\e[1;32m\nConfiguration de /etc/samba/smb.conf 'OK'\n\e[1;30m"
+# reboot de samba 4
+smbcontrol all reload-config
+
+# Gestion des services
+systemctl mask samba-ad-dc.service
+systemctl stop samba-ad-dc.service
+systemctl unmask smbd nmbd winbind
+systemctl enable smbd nmbd winbind
+
+echo  "\e[1;32m\nConfiguration de /etc/samba/smb.conf 'OK'\n\e[1;33m"
+
+#####################################
+# Jonction de la machine au domaine #
+#####################################
+
+# Jonction de la machine au domaine
+net ads join -U administrator%$var17
+echo  "\e[1;32m\nJonction au domaine $var7 'OK'\n\e[1;33m"
+
+echo "$var17" | kinit administrator@$var8
+echo  "\e[1;34m\n\nVoici les informations de votre Kerberos\n\e[1;33m"
+klist
+
+systemctl restart smbd nmbd winbind
 
 ####################
 # NSS login system #
 ####################
-
-# creer un repertoire personnel lors de la connexion
-pam-auth-update --enable mkhomedir
-echo  "\e[1;32m\nHome directory a la connexion 'OK'\n\e[1;30m"
 
 # pour pouvoir authentifier et ouvrir une session ad sur le systeme local
 cp /etc/nsswitch.conf /etc/nsswitch.conf.old
@@ -592,6 +598,11 @@ rpc:            db files
 netgroup:       nis
 EOF
 echo  "\e[1;32m\nConfiguration du NSS 'OK'\n\e[1;30m"
+
+# creer automatiquement le (home directory) pour les utilisateurs de domaine authentifies
+pam-auth-update --enable mkhomedir
+echo "session    required    pam_mkhomedir.so    skel=/etc/skel/    umask=0022" >> /etc/pam.d/common-account
+echo  "\e[1;32m\nHome directory a la connexion 'OK'\n\e[1;30m"
 
 # suppression de "try_authtok"
 # les utilisateurs authentifies localement sur linux ne peuvent pas modifier leur mot de passe depuis la console
@@ -640,11 +651,6 @@ password        required                        pam_permit.so
 EOF
 echo  "\e[1;32m\nSuppression de try_authtok 'OK'\n\e[1;30m"
 
-# les binaires Samba4 sont livres avec un demon winbind integre et active par defaut
-# desactivation du demon winbind fourni par le package winbind a partir des referentiels debian officiels
-systemctl disable winbind.service
-systemctl stop winbind.service
-
 echo  "\e[1;34m\n\nVoici les informations des groupes actuellement presents sur le domaine\n\e[1;33m"
 wbinfo -g
 
@@ -652,41 +658,23 @@ echo  "\e[1;34m\n\nVoici la liste des utilisateurs actuellement presents sur le 
 wbinfo -u
 getent passwd | grep $var7
 
-echo  "\e[1;34m\n\nVoici les parametres de mot de passe de votre domaine\n\e[1;33m"
-samba-tool domain passwordsettings show
-sleep 3
+#########################################################
+# Creation d'un répertoire de partage commun sur Samba4 #
+#########################################################
 
-echo  "\e[1;32m\nConfiguration de SAMBA 4 AD DC Secondaire 'OK'\n\e[1;30m"
-sleep 3
+mkdir /$var11
+chmod -R 775 /$var11
+chown -R root:"domain users" /$var11
 
+cp /etc/samba/smb.conf /etc/samba/smb.conf.old2
+echo "
+[$var11]
+	path = /$var11
+	read only = no" >> /etc/samba/smb.conf
 
-########################################################################
-# Replication SysVol depuis le premier controleur de domaine via Rsync #
+echo  "\e[1;32m\nCreation du dossier de partage '$var11' sur Samba4 'OK'\n\e[1;30m"
 
-echo  "\e[1;34m\nReplication SysVol depuis le premier controleur de domaine via Rsync\n\e[1;30m"
-
-# installation des paquets
-apt install -y rsync sshpass
-
-# generation d'une cle ssh
-ssh-keygen -t rsa -f /root/.ssh/rsa_SysVol -q -P ""
-
-# copie de la cle sur le serveur ADDCP
-sshpass -p $var20 ssh-copy-id -i /root/.ssh/rsa_SysVol root@addcp -f
-
-# test de replication
-sshpass -p $var20 rsync -XAavz --chmod=775 --delete-after --progress --stats -e "ssh -o StrictHostKeyChecking=no" root@addcp:/var/lib/samba/sysvol/ /var/lib/samba/sysvol/
-
-# stockage du pass pour syncro cron
-echo "$var20" > /root/.ssh/SysVol_pass
-chmod 600 /root/.ssh/SysVol_pass
-
-# ajout d'une tache automatique cron toutes les 5 minutes
-croncmd2="sshpass -f /root/.ssh/SysVol_pass rsync -XAavz --chmod=775 --delete-after --progress --stats root@addcp:/var/lib/samba/sysvol/ /var/lib/samba/sysvol/ > /var/log/sysvol-replication.log 2>&1"
-cronjob2="*/5 * * * * $croncmd2"
-( crontab -l | grep -v -F "$croncmd2" ; echo "$cronjob2" ) | crontab -
-
-echo  "\e[1;32m\nConfiguration de la replication SysVol 'OK'\n\e[1;30m"
+echo  "\e[1;32m\nConfiguration de SAMBA 4 Serveur de FICHIERS 'OK'\n\e[1;30m"
 sleep 3
 
 
