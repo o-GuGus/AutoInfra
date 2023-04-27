@@ -18,24 +18,20 @@
 9. 'GoUPDATES' Launch of updates
 
 ## Specifics functions for this machine
-JoinDOMAIN
-JoinFILE
-ConfENVGra
-ConfCOMMON
-ConfNTPClient
-GoReboot
-
-
-Samba4 AD DC domain join & FILE server connection
-- fstab
-- krb5.conf
-- smb.conf
-- Joining the machine to the domain
-- NSS login system
-
-# Access Samba common volume share from Linux clients #
-# Installing a graphical environment #
-# Installation of the "common" smb share shortcut on the desktop #
-
-# Configuring the NTP Client #
-#Reboot#
+1. JoinDOMAIN
+> Samba4 AD DC domain join & FILE server connection
+> - fstab
+> - krb5.conf
+> - smb.conf
+> - Joining the machine to the domain
+> - NSS login system
+2. JoinFILE
+Access Samba common volume share from Linux clients
+3. ConfENVGra
+Installing a graphical environment
+4. ConfCOMMON
+Installation of the "common" smb share shortcut on the desktop
+5. ConfNTPClient
+- Configuring the NTP Client
+6. GoReboot
+> Reboot
