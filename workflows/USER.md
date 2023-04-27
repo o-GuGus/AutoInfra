@@ -4,9 +4,9 @@ Issues
 
 > Request machine name
 
-Configuration of "ll & nn" hotkeys
+1. Configuration of "ll & nn" hotkeys
 
-Configuring the sbin PATH
+2. Configuring the sbin PATH
 
 Configuring SSH for root login
 
