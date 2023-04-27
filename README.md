@@ -1,4 +1,4 @@
-# infra
+# AutoInfra
 
 - **Simply to install**
 > For Debian like
