@@ -1341,9 +1341,8 @@ while [[ "$var1" =~ [^$valid] ]]; do
 # set definitive Name of machine
 var1="user-$var1"
 printf "${Green}Your machine Name is ${Purple}$var1 ${ResetColor}\n\n"
-# data
+# Base for all machines
 SetDATA
-# base
 ConfSHORTS
 ConfPATH
 ConfSSH
@@ -1352,7 +1351,7 @@ ConfHOSTS
 ConfHOSTNAME
 ConfSOURCES
 GoUPDATES
-# specific functions for this machine
+# Specifics functions for this machine
 JoinDOMAIN
 JoinFILE
 ConfENVGra
