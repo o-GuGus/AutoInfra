@@ -9,16 +9,16 @@
 1. 'SetDATA'
 - Requests for machine parameters
 > ip, ip, ip
--
+
 2. ConfSHORTS
 - Configuration of "ll & nn" hotkeys
--
+
 3. 'ConfPATH'
 - Configuring the sbin PATH
---
+
 4. 'ConfSSH'
 - Configuring SSH for root login
----
+
 5. 'ConfNETWORK'
 - Network Setup
 
