@@ -12,7 +12,7 @@
 
 2. ConfSHORTS
 - Configuration of "ll & nn" hotkeys
-
+ 
 3. 'ConfPATH'
 - Configuring the sbin PATH
 
