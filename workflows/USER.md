@@ -1,24 +1,30 @@
 ## Workflow for configuring a USER machine
 
-Issues
+# Banner, permissions and explanations
+'BANNER'
+'RootOrUser'
+'HowTo'
 
-> Request machine name
+# Base for all machines
+1. 'SetDATA' Requests for machine parameters
+> ip, ip, ip
+2. 'ConfSHORTS' Configuration of "ll & nn" hotkeys
+3. 'ConfPATH' Configuring the sbin PATH
+4. 'ConfSSH' Configuring SSH for root login
+5. 'ConfNETWORK' Network Setup
+6. 'ConfHOSTS' Configuring the HOSTS file
+7. 'ConfHOSTNAME' Configuring the HOSTNAME
+8. 'ConfSOURCES' Configuring the sources.list file
+9. 'GoUPDATES' Launch of updates
 
-1. Configuration of "ll & nn" hotkeys
+# Specifics functions for this machine
+JoinDOMAIN
+JoinFILE
+ConfENVGra
+ConfCOMMON
+ConfNTPClient
+GoReboot
 
-2. Configuring the sbin PATH
-
-Configuring SSH for root login
-
-NETWORK Setup
-
-Configuring the HOSTS file
-
-Configuring the HOSTNAME
-
-Configuring the sources.list file
-
-Updates
 
 Samba4 AD DC domain join & FILE server connection
 - fstab
