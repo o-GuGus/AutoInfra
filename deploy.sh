@@ -467,7 +467,8 @@ rm -dfr webmin_2.021_all.deb
 # print informations & sleep 3 secondes
 printf "${Green}%s ${Cyan}%s${ResetColor}\n"            "END OF" "Configuring Webmin"
 printf "${Yellow}%s ${Cyan}%s${ResetColor}\n"           "Webmin is accessible through :" "https://$var2:10000"
-printf "${Yellow}%s ${Cyan}%s${ResetColor}\n"           "Your login name :" "$USER"
+printf "${Yellow}%s ${Cyan}%s${ResetColor}\n"           "Your login name :" "root"
+printf "${Yellow}%s ${Cyan}%s${ResetColor}\n"           "Your login pass :" "SameToMachinePass"
 sleep 3
 }
 ################################################################################
