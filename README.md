@@ -4,7 +4,10 @@
 > For Debian like
 
 ~~~shell
-wget -O - https://raw.githubusercontent.com/o-GuGus/AutoInfra/master/deploy.sh | bash
+cd /tmp
+wget https://raw.githubusercontent.com/o-GuGus/AutoInfra/master/deploy.sh
+chmod +x deploy.sh
+./deploy.sh
 ~~~
 
 Based on samba 4 AD DC 
