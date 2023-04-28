@@ -16,8 +16,6 @@ clear
 Red="\e[0;31m"
 Green="\e[0;32m"
 Yellow="\e[0;33m"
-Blue="\e[0;34m"
-Purple="\e[0;35m"
 Cyan="\e[0;36m"
 ResetColor="\e[0m"
 # example (printf "${Green}%s${ResetColor}\n" "Hello in green color")
@@ -63,13 +61,14 @@ printf "${Cyan}%s${ResetColor}\n" "| Gateway of router    | GATEWAY| 192.168.1.1
 printf "${Cyan}%s${ResetColor}\n\n" "+----------------------+--------+---------------+"
 printf "${Cyan}%s${ResetColor}\n\n"     "For more information, please follow this link 'https://raw.githubusercontent.com/o-GuGus/AutoInfra/master/infra.md'"
 }
+################################################################################
 
 ################################################################################
 # check sudo or root perms #
 function RootOrUser {
 	Name=$(whoami)
-	printf "${Blue}%s${ResetColor}\n" "Hello '$Name' We will test if you have sudo or root permissions"
-	if [ $Name != "root" ]; then
+	printf "${Cyan}%s${ResetColor}\n" "Hello '$Name' We will test if you have sudo or root permissions"
+	if [ "$Name" != "root" ]; then
 		if ! sudo -l; then
 		printf "${Red}%s${ResetColor}\n" "'$Name' Is not a sudoers account"
 		printf "${Red}%s${ResetColor}\n" "Please logged in on a root or admin account and restart the script '$0'"
@@ -85,7 +84,7 @@ function RootOrUser {
 		printf "${Green}%s${ResetColor}\n" "'$Name' Is a good account"
 	fi
 # if sudo -u root "$0" is launched, this condition exiting properly the first script lauched by user
-if [ $Name != "root" ]; then
+if [ "$Name" != "root" ]; then
 exit 0
 fi
 }
@@ -198,7 +197,7 @@ printf "${Yellow}%s ${Green}%s${ResetColor}\n\n"        "ADDCP root password:" "
 
 # Export all variables for functions, from 0 to 20
 for i in {0..20}; do
-  export var$i
+  export var"$i"
 done
 
 # Informations is correct ?! #
@@ -206,101 +205,82 @@ printf "${Yellow}%s${ResetColor}\n"     "Informations is correct ?! (Y/N)"
 read -r info
 
 if [[ "$info" =~ ^[yYoO] ]]; then
-	printf "\n${Green}'OK' ${Blue}Installation starts in 3 seconds ${ResetColor}\n"
+	printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "OK" "Installation starts in 3 seconds"
 	sleep 3
 elif [[ "$info" =~ ^[nN] ]]; then
-	printf "\n${Red}'OK' Go to restart the script${Purple} '$0' ${ResetColor}\n"
+	printf "${Red}%s ${Cyan}%s${ResetColor}\n"      "OK" "Go to restart the script '$0'"
 	./"$0"
 		else
-                printf "\n${Red}'INPUT ERROR' Go to restart the script${Purple} '$0' ${ResetColor}\n"
+                printf "${Red}%s ${Yellow}%s${ResetColor}\n"      "INPUT ERROR" "Go to restart the script '$0'"
 	        ./"$0"
 fi
 }
+################################################################################
 
-
-
-################################################################
-#  BASE FUNCTION FOR ALL MACHINES
-################################################################
-
-######################################################################
+################################################################################
 # Configuring SSH for root login #
-
 function ConfSSH {
 apt -y install openssh-server
 systemctl enable ssh
 systemctl start ssh
-
 cp /etc/ssh/sshd_config /etc/ssh/sshd_config.old
-
 echo "PermitRootLogin yes" >> /etc/ssh/sshd_config
-
-printf "${Cyan}Configuring SSH for root login ${Green}'OK' ${ResetColor}\n"
+systemctl restart ssh
+printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "END OF" "Configuring SSH for root login"
 sleep 3
 }
+################################################################################
 
-
-
-######################################################################
+################################################################################
 # Configuration of "ll & nn" alias #
-
 function ConfSHORTS {
 cp ~/.bashrc ~/.bashrc.old
-
 cat <<EOF > ~/.bashrc
 # ~/.bashrc: executed by bash(1) for non-login shells.
 
 # Note: PS1 and umask are already set in /etc/profile. You should not
 # need this unless you want different defaults for root.
-# PS1='\${debian_chroot:+(\$debian_chroot)}\h:\w$ '
+# PS1='\${debian_chroot:+(\$debian_chroot)}\h:\w\\$ '
 # umask 022
 
 # You may uncomment the following lines if you want 'ls' to be colorized:
-export LS_OPTIONS='--color=auto'
-# eval "'dircolors'"
-alias ls='ls $LS_OPTIONS'
-alias ll='ls $LS_OPTIONS -ahl'
-# alias ll='ls $LS_OPTIONS -l'
-# alias l='ls $LS_OPTIONS -lA'
+ export LS_OPTIONS='--color=auto'
+ eval "\$(dircolors)"
+ alias ls='ls \$LS_OPTIONS'
+ alias ll='ls \$LS_OPTIONS -ahl'
+ alias l='ls \$LS_OPTIONS -lA'
 
 # Some more alias to avoid making mistakes:
 # alias rm='rm -i'
 # alias cp='cp -i'
 # alias mv='mv -i'
-# alias ll='ls -ahl'
 
 # alias for nano
 alias nn='nano'
 EOF
-
-printf "${Cyan}Configuration of shortcuts (ll & nn) ${Green}'OK' ${ResetColor}\n"
+printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "END OF" "Configuration of shortcuts (ll & nn)"
 sleep 3
 }
+################################################################################
 
-
-######################################################################
+################################################################################
 # Configuring the sbin PATH #
-
 function ConfPATH {
 echo "# Configuring the sbin PATH" >> ~/.bashrc
 echo "export PATH=/usr/local/sbin:/usr/sbin:/sbin:$PATH" >> ~/.bashrc
 # bashrc reload
 . ~/.bashrc
-
-printf "${Cyan}Configuring the sbin PATH ${Green}'OK' ${ResetColor}\n"
+printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "END OF" "Configuring the sbin PATH"
 sleep 3
 }
+################################################################################
 
-
-######################################################################
+################################################################################
 # NETWORK Setup #
-
 function ConfNETWORK {
 # install apt package for name resolution with resolvconf on Linux Debian
 apt -y install resolvconf
-
 cp /etc/network/interfaces /etc/network/interfaces.old
-
 echo "# This file describes the network interfaces available on your system
 # and how to activate them. For more information, see interfaces(5).
 source /etc/network/interfaces.d/*
@@ -321,56 +301,45 @@ iface $var14 inet static
         dns-nameservers $var5
 #default search domain
         dns-search $var0" > /etc/network/interfaces
-
-printf "${Cyan}NETWORK Setup ${Green}'OK' ${ResetColor}\n"
+printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "END OF" "NETWORK Setup"
 sleep 3
 }
+################################################################################
 
-
-######################################################################
+################################################################################
 # Configuring the HOSTS file #
-
 function ConfHOSTS {
-cp /etc/hosts  /etc/hosts.old
-
+cp /etc/hosts  /etc/hosts.old   # Create a backup copy
 echo "127.0.0.1       localhost
 $var2     $var1.$var0     $var1
 
 # The following lines are desirable for IPv6 capable hosts
 ::1     localhost ip6-localhost ip6-loopback
 ff02::1 ip6-allnodes
-ff02::2 ip6-allrouters" > /etc/hosts
-
-printf "${Cyan}Configuring the HOSTS file ${Green}'OK' ${ResetColor}\n"
-sleep 3
+ff02::2 ip6-allrouters" > /etc/hosts   # Add the specified entries
+printf "${Green}%s ${Cyan}%s${ResetColor}\n"        "END OF" "Configuring the HOSTS file"   # Display a confirmation message
+sleep 3   # Wait for 3 seconds
 }
+################################################################################
 
-
-######################################################################
+################################################################################
 # Configuring the HOSTNAME #
-
 function ConfHOSTNAME {
 cp /etc/hostname  /etc/hostname.old
 echo "$var1" > /etc/hostname
-hostname $var1
-
-printf "${Cyan}Configuring the HOSTNAME ${Green}'OK' ${ResetColor}\n"
-
+hostname "$var1"
 # reboot the network service
 /etc/init.d/networking restart
-ifup $var14
-
+ifup "$var14"
+printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "END OF" "Configuring the HOSTNAME"
 sleep 3
 }
+################################################################################
 
-
-
-######################################################################
+################################################################################
 # Configuring the sources.list file #
-
 function ConfSOURCES {
 cp /etc/apt/sources.list /etc/apt/sources.list.old
-
 echo "#deb cdrom:[Debian GNU/Linux 10 _Buster_ - Official amd64 NETINST]/ buster main
 
 deb http://deb.debian.org/debian/ buster main contrib non-free
@@ -388,39 +357,35 @@ deb-src http://deb.debian.org/debian/ buster-updates main contrib non-free
 # entries were disabled at the end of the installation process.
 # For information about how to configure apt package sources,
 # see the sources.list(5) manual." > /etc/apt/sources.list
-
-printf "${Cyan}Configuring the sources.list file ${Green}'OK' ${ResetColor}\n"
+printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "END OF" "Configuring the sources.list file"
 sleep 3
 }
+################################################################################
 
-
-#####################################################################
+################################################################################
 # Updates #
-
 function GoUPDATES {
-apt update
-apt dist-upgrade -y
-
-printf "${Cyan}Updates ${Green}'OK' ${ResetColor}\n"
+apt update && apt full-upgrade -y && apt autoremove -y
+printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "END OF" "Updates"
 sleep 3
 }
+################################################################################
 
-
-######################################################################
-# Configuring SSL auto renew for Webmin through CERTBOT # UNIVERSAL VERSION # 
-
+################################################################################
+# Configuring SSL auto renew for Webmin through CERTBOT
 function ConfSSL {
-printf "${Yellow}Configuring SSL auto renew for Webmin through CERTBOT${ResetColor}\n"
-printf "${Red}Is this machine accessible from the outside via port 80? (Y/N)${ResetColor}\n"
+printf "${Red}%s${ResetColor}\n"     "Configuring SSL auto renew for Webmin through CERTBOT"
+printf "${Red}%s${ResetColor}\n"     "Is this machine accessible from the outside via port 80? (Y/N)"
 
 read -r cert
 if [[ "$cert" =~ ^[yYoO] ]]; then
-printf "\n${Green}'OK' ${Blue}Installation starts in 3 seconds ${ResetColor}\n"
+# Afficher le message en utilisant le formatage de chaîne pour les couleurs
+printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "OK" "Installation starts in 3 seconds"
 
 # installation of certbot and generation of certificates
 apt install -y certbot
 certbot certonly --standalone -d "$var1"."$var0"
-printf "${Cyan}Certbot installed and certificate generated${Green}'OK' ${ResetColor}\n"
+printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "OK" "Certbot installed and certificates generated"
 
 # add grp for automatic SSL renewal script
 addgroup ssl-cert
@@ -458,76 +423,69 @@ cronjob1="15 3 1 * * $croncmd1"
 ( crontab -l | grep -v -F "$croncmd1" ; echo "$cronjob1" ) | crontab -
 
 # verify files and explanations of operation
-printf "${Purple}Your ORIGINAL CERTBOT SSL certificate and chain have been saved here: \n
-/etc/letsencrypt/live/$var1.$var0/fullchain.pem \n
-Your CERTBOT ORIGNAL SSL key file has been saved here: \n
-/etc/letsencrypt/live/$var1.$var0/privkey.pem\n\e[1;30m ${ResetColor}\n"
+printf "${Yellow}%s${ResetColor}\n"   "Your ORIGINAL CERTBOT SSL certificates and chain have been saved here:"
+printf "${Cyan}%s${ResetColor}\n"     "/etc/letsencrypt/live/$var1.$var0/fullchain.pem"
+printf "${Yellow}%s${ResetColor}\n"   "Your CERTBOT ORIGNAL SSL key file has been saved here:"
+printf "${Cyan}%s${ResetColor}\n"     "/etc/letsencrypt/live/$var1.$var0/privkey.pem"
+printf "${Red}%s${ResetColor}\n"      "ORIGINALS should not be used in applications or websites but only COPIES"
+printf "${Red}%s${ResetColor}\n"      "Your duplicate certificates and WITH THE RIGHT RIGHTS are registered here:"
+renew1=$(ls -ahl /etc/ssl/certs/$var1.$var0*) && printf "%s\n" "$renew1"
+renew2=$(ls -ahl /etc/ssl/private/$var1.$var0*) && printf "%s\n" "$renew2"
 
-printf  "${Red}\nORIGINALS should not be used in applications or websites but only COPIES: ${ResetColor}\n"
-printf  "${Blue}Your duplicate certificates and WITH THE RIGHT RIGHTS are registered here: ${ResetColor}"
-renew1=$(ls -ahl /etc/ssl/certs/$var1.$var0*) && printf  "$renew1"
-renew2=$(ls -ahl /etc/ssl/private/$var1.$var0*) && printf  "$renew2\n"
-printf  "${Red}The renewal will be done automatically every 1st of the month at 3:15 a.m.${ResetColor}"
-printf  "${Blue}Your log file of renew is '/var/log/renew-ssl-cerbot.log'${ResetColor}\n"
-printf  "${Cyan}Configuring SSL auto-renewal script via CERTBOT ${Green}'OK'${ResetColor}\n"
+printf "${Red}%s${ResetColor}\n"                "The renewal will be done automatically every 1st of the month at 3:15 a.m."
+printf "${Yellow}%s${ResetColor}\n"             "Your log file of renew is '/var/log/renew-ssl-cerbot.log'"
+printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "END OF" "Configuring SSL auto-renewal script via CERTBOT"
 sleep 3
 
 elif [[ "$cert" =~ ^[nN] ]]; then
-	printf "\n${Purple}'OK' ${Blue}SSL auto renew for Webmin through CERTBOT was 'CANCELLED'${ResetColor}\n"
-        printf "${Blue}Your webmin only use the auto generated certificate by default${ResetColor}\n"
+	printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "OK" "SSL auto renew for Webmin through CERTBOT was 'CANCELLED'"
+        printf "${Cyan}%s${ResetColor}\n"               "Your Webmin only use the auto generated certificate by default"
         sleep 3
-
         else
-        printf "\n${Red}'INPUT ERROR' Go to restart the script${Purple} '$0' ${ResetColor}\n"
+        printf "${Red}%s ${Yellow}%s${ResetColor}\n"    "INPUT ERROR" "Go to restart the script '$0'"
 	./"$0"
 fi
 }
+################################################################################
 
-
-
-
-######################################################################
-# Configuring Webmin # UNIVERSAL VERSION #
-
+################################################################################
+# Configuring Webmin
 function ConfWEBMIN {
 # install the necessary packages for Webmin
 apt install -y shared-mime-info perl libnet-ssleay-perl openssl libauthen-pam-perl libpam-runtime libio-pty-perl apt-show-versions python unzip zip
 
 # download & install latest version of Webmin
 cd /tmp || exit 1
-wget http://prdownloads.sourceforge.net/webadmin/webmin_1.962_all.deb
-dpkg --install webmin_1.962_all.deb
-rm -dfr webmin_1.962_all.deb
+wget https://github.com/webmin/webmin/releases/download/2.021/webmin_2.021_all.deb
+dpkg --install webmin_2.021_all.deb
+rm -dfr webmin_2.021_all.deb
 
 # print informations & sleep 3 secondes
-printf "${Cyan}Configuring Webmin ${Green}'OK' ${ResetColor}\n"
-printf "${Yellow}Webmin is accessible through ${Purple}https://$var2:10000 ${ResetColor}\n"
-printf "${Yellow}Your login name : ${Purple}$USER ${ResetColor}\n"
+printf "${Green}%s ${Cyan}%s${ResetColor}\n"            "END OF" "Configuring Webmin"
+printf "${Yellow}%s ${Cyan}%s${ResetColor}\n"           "Webmin is accessible through :" "https://$var2:10000"
+printf "${Yellow}%s ${Cyan}%s${ResetColor}\n"           "Your login name :" "$USER"
 sleep 3
 }
+################################################################################
 
-
-
-######################################################################
+################################################################################
 # Configuring BIND9 #
-
 function ConfBIND9 {
 #     Config for (NS1)    #
 if [ "$var1" = "ns1" ]; then
 ServerIP="$var5"
-printf "${Blue}Start Bind9 configuration for server $ServerIP ${ResetColor}\n"
+printf "${Cyan}%s${ResetColor}\n"       "Start Bind9 configuration for server $ServerIP"
 fi
 #     Config for (NS2)    #
 if [ "$var1" = "ns2" ]; then
 ServerIP="$var4"
-printf "${Blue}Start Bind9 configuration for server $ServerIP ${ResetColor}\n"
+printf "${Cyan}%s${ResetColor}\n"       "Start Bind9 configuration for server $ServerIP"
 fi
 
 # install the necessary packages Bind9
 apt install -y bind9 bind9utils bind9-doc
 systemctl enable bind9
 systemctl start bind9
-
 
 ##### /etc/bind/named.conf #####
 cp /etc/bind/named.conf /etc/bind/named.conf.old
@@ -547,7 +505,6 @@ server $ServerIP {
         };
 EOF
 ##### /etc/bind/named.conf #####
-
 
 ##### /etc/bind/named.conf.options #####
 cp /etc/bind/named.conf.options /etc/bind/named.conf.options.old
@@ -583,11 +540,11 @@ options {
 EOF
 ##### /etc/bind/named.conf.options #####
 
-
 ##### cut from the ip of the srv to the first 3 blocks, example 192.168.0
-ipcut=$(echo $var2 |cut -d. -f 1,2,3)
+ipcut=$(echo "$var2" |cut -d. -f 1,2,3)
 ##### reversal of the cut of the ip of the srv, example 0.168.192
-ipcutrev=$(echo $var2 | awk -F. '{print $3"."$2"."$1}')
+ipcutrev=$(echo "$var2" | awk -F. '{print $3"."$2"."$1}')
+
 ##### /etc/bind/named.conf.local #####
 cp /etc/bind/named.conf.local /etc/bind/named.conf.local.old
 cat <<EOF > /etc/bind/named.conf.local
@@ -610,9 +567,8 @@ zone "$ipcutrev.in-addr.arpa" {
 EOF
 ##### /etc/bind/named.conf.local #####
 
-
 ##### /var/lib/bind/$var0.hosts #####
-cat <<EOF > /var/lib/bind/$var0.hosts
+cat <<EOF > /var/lib/bind/"$var0".hosts
 \$ttl 38400
 $var0.      IN      SOA     $var1.$var0. admin.$var0. (
                         1595498695   ; serial
@@ -678,19 +634,19 @@ _kerberos               IN TXT     $var8
 EOF
 ##### /var/lib/bind/$var0.hosts #####
 
-
 ##### reversal of the primary dns ip
-ipns1rev=$(echo $var4 | awk -F. '{print $4"."$3"."$2"."$1}')
+ipns1rev=$(echo "$var4" | awk -F. '{print $4"."$3"."$2"."$1}')
 ##### reversal of the secondary dns ip
-ipns2rev=$(echo $var5 | awk -F. '{print $4"."$3"."$2"."$1}')
+ipns2rev=$(echo "$var5" | awk -F. '{print $4"."$3"."$2"."$1}')
 ##### reversal of the addcp srv ip
-ipaddcprev=$(echo $var15 | awk -F. '{print $4"."$3"."$2"."$1}')
+ipaddcprev=$(echo "$var15" | awk -F. '{print $4"."$3"."$2"."$1}')
 ##### reversal of the addcs srv ip
-ipaddcsrev=$(echo $var16 | awk -F. '{print $4"."$3"."$2"."$1}')
+ipaddcsrev=$(echo "$var16" | awk -F. '{print $4"."$3"."$2"."$1}')
 ##### reversal of the ip of the srv files
-ipfichiersrev=$(echo $var19 | awk -F. '{print $4"."$3"."$2"."$1}')
+ipfichiersrev=$(echo "$var19" | awk -F. '{print $4"."$3"."$2"."$1}')
+
 ##### /var/lib/bind/$ipcut.rev #####
-cat <<EOF > /var/lib/bind/$ipcut.rev
+cat <<EOF > /var/lib/bind/"$ipcut".rev
 \$ttl 38400
 $ipcutrev.in-addr.arpa.        IN      SOA     $var1.$var0. admin.$var0. (
                         1596472349
@@ -710,46 +666,44 @@ EOF
 # restart service bind9
 systemctl restart bind9
 
-printf "${Cyan}Configuring BIND9 ${Green}'OK' ${ResetColor}\n"
+printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "END OF" "Configuring BIND9"
 sleep 3
 }
+################################################################################
 
-
-######################################################################
+################################################################################
 # Server configuration (ADDCP) SAMBA 4 AD DC Primary #
 # OR #
 # Server configuration (ADDCS) SAMBA 4 AD DC Secondary #
-
 function ConfSAMBA4AD {
 #     Banner for (ADDCP)    #
 if [ "$var1" = "addcp" ]; then
-printf "${Blue}Start Server configuration $var18 SAMBA 4 AD DC Primary ${ResetColor}\n"
+printf "${Cyan}%s${ResetColor}\n"       "Start Server configuration $var18 SAMBA 4 AD DC Primary"
 fi
 #     Banner for (ADDCS)    #
 if [ "$var1" = "addcs" ]; then
-printf "${Blue}Start Server configuration $var18 SAMBA 4 AD DC Secondary ${ResetColor}\n"
+printf "${Cyan}%s${ResetColor}\n"       "Start Server configuration $var18 SAMBA 4 AD DC Secondary"
 fi
-
 
 ##############
 # /etc/fstab #
 ##############
 cp /etc/fstab  /etc/fstab.old
 # get primary partition UUID
-UUID=$(cat /etc/fstab | grep ext4 | awk -F/ '{print $1}')
+UUID=$(< /etc/fstab grep ext4 | awk -F/ '{print $1}')
 # deleting the line /ext4 primary partition
 sed -i".bak" '/ext4/d' /etc/fstab
 # creating the line /ext4 primary partition with the new attributes
 echo "$UUID    /    ext4    noatime,nodiratime,user_xattr,acl,errors=remount-ro    0    1" >> /etc/fstab
+printf "${Green}%s ${Cyan}%s${ResetColor}\n"      "END OF" "Configure FSTAB"
 
-printf  "${Green}\nConfigure FSTAB 'OK' ${ResetColor}\n"
-printf  "${Red}\nSeveral windows will appear, just hit 'ENTER' each time ${ResetColor}\n"
+# important notice
+printf "${Red}%s${ResetColor}\n" "Several windows will appear, just hit 'ENTER' each time"
 sleep 20
 
 # install packages for samba4 4 AD DC
 apt install -y samba krb5-user krb5-config winbind libpam-winbind libnss-winbind acl
-printf  "${Green}\nInstallation of Samba4 4 AD DC packages 'OK' ${ResetColor}\n"
-
+printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "END OF" "Installation of Samba4 4 AD DC packages"
 
 ##################
 # /etc/krb5.conf #
@@ -794,8 +748,7 @@ cat <<EOF > /etc/krb5.conf
 		.$var0 = $var8
 		$var0 = $var8
 EOF
-printf  "${Green}\nConfiguration KERBEROS 'OK' ${ResetColor}\n"
-
+printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "END OF" "Configuring KERBEROS"
 
 # stop old services
 systemctl stop samba-ad-dc.service smbd.service nmbd.service winbind.service
@@ -804,23 +757,21 @@ systemctl disable samba-ad-dc.service smbd.service nmbd.service winbind.service
 # moved old Samba 4 conf file
 mv /etc/samba/smb.conf /etc/samba/smb.conf.old1
 
-
-#     Config for (ADDCP)    #
+###     Config for (ADDCP)    ###
 if [ "$var1" = "addcp" ]; then
 # creation of the samba 4 domain #
-samba-tool domain provision --use-rfc2307 --realm $var8 --domain $var7 --server-role dc --dns-backend BIND9_FLATFILE --adminpass $var17
-#samba-tool domain provision --use-rfc2307 --realm $var8 --domain $var7 --server-role dc --dns-backend SAMBA_INTERNAL --adminpass $var17
-#samba-tool domain provision --use-rfc2307 --realm $var8 --domain $var7 --server-role dc --dns-backend BIND9_DLZ --adminpass $var17
-printf  "${Green}\nCreation of the domain $var7 'OK' ${ResetColor}\n"
+samba-tool domain provision --use-rfc2307 --realm "$var8" --domain "$var7" --server-role dc --dns-backend BIND9_FLATFILE --adminpass "$var17"
+#samba-tool domain provision --use-rfc2307 --realm "$var8" --domain "$var7" --server-role dc --dns-backend SAMBA_INTERNAL --adminpass "$var17"
+#samba-tool domain provision --use-rfc2307 --realm "$var8" --domain "$var7" --server-role dc --dns-backend BIND9_DLZ --adminpass "$var17"
+printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "END OF" "Creation of the domain '$var7'"
 fi
 
-#     Config for (ADDCS)    #
+###     Config for (ADDCS)    ###
 if [ "$var1" = "addcs" ]; then
 # Joining the Samba4 AD DC from the ADDCP srv as a secondary domain controller #
-samba-tool domain join $var0 DC -U "administrator" --password "$var17"
-printf  "${Green}\nDomain join $var7 'OK' ${ResetColor}\n"
+samba-tool domain join "$var0" DC -U "administrator" --password "$var17"
+printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "END OF" "Joigning domain '$var7'"
 fi
-
 
 # service management
 systemctl unmask samba-ad-dc.service
@@ -828,14 +779,15 @@ systemctl enable samba-ad-dc.service
 systemctl start samba-ad-dc.service
 
 # information about Domain
-printf  "${Blue}\nHere is the information about your SAMBA 4 AD DC domain: ${Yellow}\n"
+printf "${Cyan}%s\n${Yellow}"      "Here is the informations about your SAMBA 4 AD DC domain: "
 samba-tool domain level show
+printf "%s${ResetColor}\n"
 
 # information about Kerberos
-echo "$var17" | kinit administrator@$var8
-printf  "${Blue}\n\nHere is your Kerberos information: ${Yellow}\n"
+echo "$var17" | kinit administrator@"$var8"
+printf "${Cyan}%s\n${Yellow}"       "Here is your Kerberos informations: "
 klist
-
+printf "%s${ResetColor}\n"
 
 #######################
 # /etc/samba/smb.conf #
@@ -901,9 +853,7 @@ EOF
 
 # reboot service samba 4 ad dc
 systemctl restart samba-ad-dc.service
-
-printf "${Green}\nConfiguring /etc/samba/smb.conf 'OK' ${ResetColor}\n"
-
+printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "END OF" "Configuring '/etc/samba/smb.conf'"
 
 ####################
 # NSS login system #
@@ -911,7 +861,7 @@ printf "${Green}\nConfiguring /etc/samba/smb.conf 'OK' ${ResetColor}\n"
 
 # creer un repertoire personnel lors de la connexion
 pam-auth-update --enable mkhomedir
-printf "${Green}\nHome directory has connection 'OK' ${ResetColor}\n"
+printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "END OF" "Home directory has connection"
 
 # pour pouvoir authentifier et ouvrir une session ad sur le systeme local
 cp /etc/nsswitch.conf /etc/nsswitch.conf.old
@@ -937,7 +887,7 @@ rpc:            db files
 
 netgroup:       nis
 EOF
-printf "${Green}\nConfigure NSS 'OK' ${ResetColor}\n"
+printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "END OF" "Configuring NSS"
 
 # suppression de "try_authtok"
 # les utilisateurs authentifies localement sur linux ne peuvent pas modifier leur mot de passe depuis la console
@@ -984,52 +934,55 @@ password        required                        pam_permit.so
 # and here are more per-package modules (the "Additional" block)
 # end of pam-auth-update config
 EOF
-printf "${Green}\nRemove try_authtok 'OK'${ResetColor}\n"
+printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "END OF" "Remove try_authtok"
 
 # les binaires Samba4 sont livres avec un demon winbind integre et active par defaut
 # desactivation du demon winbind fourni par le package winbind a partir des referentiels debian officiels
 systemctl disable winbind.service
 systemctl stop winbind.service
+printf "%s${ResetColor}\n\n"
 
-printf "${Blue}\n\nHere is the information of the groups currently present on the domain ${Yellow}\n"
+printf "${Cyan}%s\n${Yellow}"           "Here is the information of the groups currently present on the domain :"
 wbinfo -g
+printf "%s${ResetColor}\n\n"
 
-printf "${Blue}\n\nHere is the list of users currently present on the domain ${Yellow}\n"
+printf "${Cyan}%s\n${Yellow}"           "Here is the list of users currently present on the domain :"
 wbinfo -u
-getent passwd | grep $var7
+getent passwd | grep "$var7"
+printf "%s${ResetColor}\n\n"
 
-printf "${Blue}\n\nHere are the password settings for your domain ${Yellow}\n"
+printf "${Cyan}%s\n${Yellow}"           "Here are the password settings for your domain :"
 samba-tool domain passwordsettings show
+printf "%s${ResetColor}\n\n"
 sleep 3
 
 #     Config for (ADDCP)    #
 if [ "$var1" = "addcp" ]; then
-printf "${Green}\nConfiguring SAMBA 4 AD DC Primary 'OK' ${ResetColor}\n"
+printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "END OF" "Configuring SAMBA 4 AD DC Primary"
 sleep 3
 fi
 
 #     Config for (ADDCS)    #
 if [ "$var1" = "addcs" ]; then
-printf "${Green}\nConfiguring SAMBA 4 AD DC Secondary 'OK' ${ResetColor}\n"
+printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "END OF" "Configuring SAMBA 4 AD DC Secondary"
 sleep 3
 fi
 }
+################################################################################
 
-
-#################################################################
+################################################################################
 # SysVol replication from the first domain controller via Rsync #
 function ConfRSYNCSysVol {
-
 #     Config for (ADDCP)    #
 if [ "$var1" = "addcp" ]; then
 apt install -y rsync
-printf "${Green}\nSysVol replication SERVER 'OK' ${ResetColor}\n"
+printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "END OF" "SysVol replication 'SERVER'"
 sleep 3
 fi
 
 #     Config for (ADDCS)    #
 if [ "$var1" = "addcs" ]; then
-printf "${Blue}\nSysVol CLIENT replication being configured ${ResetColor}\n"
+printf "${Cyan}%s${ResetColor}\n"               "SysVol 'CLIENT' replication being configured..."
 
 # installation des paquets
 apt install -y rsync sshpass
@@ -1038,10 +991,10 @@ apt install -y rsync sshpass
 ssh-keygen -t rsa -f /root/.ssh/rsa_SysVol -q -P ""
 
 # copie de la cle sur le serveur ADDCP
-sshpass -p $var20 ssh-copy-id -i /root/.ssh/rsa_SysVol root@addcp -f
+sshpass -p "$var20" ssh-copy-id -i /root/.ssh/rsa_SysVol root@addcp -f
 
 # test de replication
-sshpass -p $var20 rsync -XAavz --chmod=775 --delete-after --progress --stats -e "ssh -o StrictHostKeyChecking=no" root@addcp:/var/lib/samba/sysvol/ /var/lib/samba/sysvol/
+sshpass -p "$var20" rsync -XAavz --chmod=775 --delete-after --progress --stats -e "ssh -o StrictHostKeyChecking=no" root@addcp:/var/lib/samba/sysvol/ /var/lib/samba/sysvol/
 
 # stockage du pass pour syncro cron
 echo "$var20" > /root/.ssh/SysVol_pass
@@ -1052,13 +1005,13 @@ croncmd2="sshpass -f /root/.ssh/SysVol_pass rsync -XAavz --chmod=775 --delete-af
 cronjob2="*/5 * * * * $croncmd2"
 ( crontab -l | grep -v -F "$croncmd2" ; echo "$cronjob2" ) | crontab -
 
-printf "${Green}\nConfiguring SysVol Replication CLIENT 'OK' ${ResetColor}\n"
+printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "END OF" "Configuring SysVol Replication 'CLIENT'"
 sleep 3
 fi
 }
+################################################################################
 
-
-######################################################################
+################################################################################
 # Configuration du serveur NTP #
 function ConfNTPServer {
 apt install -y ntp ntpdate
@@ -1111,15 +1064,65 @@ chmod 750 /var/lib/samba/ntp_signd/
 systemctl restart ntp
 
 # verification du ntp
-printf "${Yellow}\nVerification des pairs du serveur ntp ${ResetColor}\n"
+printf "${Cyan}%s\n${Yellow}"   "Checking NTP peers :"
 ntpq -p
+printf "%s${ResetColor}\n"
 
-printf "${Green}\nConfiguration du serveur NTP 'OK' ${ResetColor}\n"
+printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "END OF" "NTP 'SERVER' configuration"
 sleep 3
 }
+################################################################################
 
 
-######################################################################
+
+
+
+
+################################################################################
+function ConfFILEServer {
+echo "a faire"
+}
+################################################################################
+
+
+################################################################################
+function ConfDIRECTORYCommon {
+echo "a faire"
+}
+################################################################################
+
+
+################################################################################
+function JoinDOMAIN {
+echo "a faire"
+}
+################################################################################
+
+
+################################################################################
+function JoinFILE {
+echo "a faire"
+}
+
+################################################################################
+
+################################################################################
+function ConfENVGra {
+echo "a faire"
+}
+################################################################################
+
+################################################################################
+function ConfCOMMON {
+echo "a faire"
+}
+################################################################################
+
+
+
+
+
+################################################################################
 # Configuration du Client NTP #
 function ConfNTPClient {
 apt install -y ntp ntpdate
@@ -1152,11 +1155,13 @@ EOF
 systemctl restart ntp
 
 # verification du ntp
-printf "${Yellow}\nVerification des pairs du Client NTP ${ResetColor}\n"
+printf "${Cyan}%s\n${Yellow}"   "Checking NTP peers :"
 ntpq -p
+printf "%s${ResetColor}\n"
 
-printf "${Yellow}\nSynchronisation avec le serveur NTP du domaine $var0 ${ResetColor}\n"
-ntpdate -bu $var0
+printf "${Cyan}%s\n${Yellow}"   "Synchronization with NTP server of domain '$var0'"
+ntpdate -bu "$var0"
+printf "%s${ResetColor}\n"
 
 # ajout d'une tache automatique cron toutes les jours a 23hx pour la syncro de l'heure avec le domaine
 chiffre=$(awk -v min=1 -v max=59 'BEGIN{srand(); print int(min+rand()*(max-min+1))}')
@@ -1164,31 +1169,34 @@ croncmd3="/usr/sbin/ntpdate -bu $var0 > /var/log/ntp.log 2>&1"
 cronjob3="*/$chiffre 23 * * * $croncmd3"
 ( crontab -l | grep -v -F "$croncmd3" ; echo "$cronjob3" ) | crontab -
 
-printf "${Green}\nConfiguration du Client NTP 'OK' ${ResetColor}\n"
+printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "END OF" "Configuring the NTP 'CLIENT'"
 sleep 3
 }
+################################################################################
 
-#####################################################################
+################################################################################
 # Reboot #
 function GoReboot {
-printf "${Red}\nVotre serveur va redemmarrer dans 5 secondes .....\n"
+printf "${Red}%s${ResetColor}\n" "Your server will restart in 5 seconds ....."
 sleep 1
-echo  "\nVotre serveur va redemmarrer dans 4 secondes ....\n"
+printf "${Red}%s${ResetColor}\n" "Your server will restart in 4 seconds ...."
 sleep 1
-echo  "\nVotre serveur va redemmarrer dans 3 secondes ...\n"
+printf "${Red}%s${ResetColor}\n" "Your server will restart in 3 seconds ..."
 sleep 1
-echo  "\nVotre serveur va redemmarrer dans 2 secondes ..\n"
+printf "${Red}%s${ResetColor}\n" "Your server will restart in 2 seconds .."
 sleep 1
-echo  "\nVotre serveur va redemmarrer dans 1 secondes . ${ResetColor}\n"
+printf "${Red}%s${ResetColor}\n" "Your server will restart in 1 seconds ."
 sleep 1
 systemctl reboot
 }
 
+################################################################################
 ################################################################
-################################################################
+############################################
 #  MAIN SCRIPT START HERE
+############################################
 ################################################################
-################################################################
+################################################################################
 # Banners 
 BANNER
 #
@@ -1329,17 +1337,18 @@ GoReboot
 #*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#
 # If Choice is : User machine (USER)  #
 6)
-printf "${Purple}Name of the machine (ex: GuiGos123) in a single block without spaces or symbols:${ResetColor}\n"
-read var1 # FixNAME
+# Set machine name
+printf "${Red}%s${ResetColor}\n"        "Name of the machine (ex: Machine123) in a single block without spaces or symbols :"
+read -r var1
 # Check the input value contains the alphabet and number only
 valid='[:alnum:]'
 while [[ "$var1" =~ [^$valid] ]]; do
-	printf "${Red}Enter a machine Name with contains alphabet and number only:${ResetColor}\n"
-	read var1 # FixNAME
-	done
+printf "${Red}%s${ResetColor}\n"        "Enter a machine Name with contains alphabet and number only :"
+read -r var1
+done
 # set definitive Name of machine
 var1="user-$var1"
-printf "${Green}Your machine Name is ${Purple}$var1 ${ResetColor}\n\n"
+printf "${Cyan}%s ${Green}%s${ResetColor}\n"    "Your machine Name is :" "$var1"
 # Base for all machines
 SetDATA
 ConfSHORTS
@@ -1366,29 +1375,33 @@ exit 0
 #*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#
 # If Choice is :   Other caracters
 *)
-printf "${Red}Input error, please restart the script $0 ${ResetColor}\n"
+printf "${Green}%s ${Cyan}%s${ResetColor}\n" "INPUT ERROR" "Please restart the script '$0'"
 exit 1
 ;;
 esac
-#########################################
+################################################################################
+################################################################
+############################################
+#  MAIN SCRIPT STOP HERE
+############################################
+################################################################
+################################################################################
 
 
 
 
 # enable ssh login for root user ?! #
-printf "\n${Yellow}Do you want to enable ssh login for root user ?! (Y/N)${ResetColor}\n"
-read sshroot
+printf "${Red}%s${ResetColor}\n"        "Do you want to enable ssh login for root user ?! (Y/N)"
+read -r sshroot
 if [[ "$sshroot" =~ ^[yYoO] ]]; then
-	printf "\n${Green}'OK'${Blue} Enable ssh login for root user ${ResetColor}\n"
+	printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "START" "Enabling ssh login for root user"
 	ConfSSH
 else
-	printf "\n${Green}'OK'${Blue} Not enable ssh login for root user ${ResetColor}\n"
+	printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "OK" "Not enabling ssh login for root user"
 	apt -y install openssh-server
 	systemctl enable ssh
 	systemctl start ssh
 fi
 
-# base
 
-# The rest of the specific workflow for each machine is located just above
 
