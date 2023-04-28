@@ -66,23 +66,34 @@ printf "${Cyan}%s${ResetColor}\n\n"     "For more information, please follow thi
 ################################################################################
 # check sudo or root perms #
 function RootOrUser {
-	Name=$(whoami)
-	printf "${Cyan}%s${ResetColor}\n" "Hello '$Name' We will test if you have sudo or root permissions"
-	if [ "$Name" != "root" ]; then
-		if ! sudo -l; then
-		printf "${Red}%s${ResetColor}\n" "'$Name' Is not a sudoers account"
+Name=$(whoami)
+printf "${Green}%s ${Cyan}%s${ResetColor}\n" "👋 '$Name'" "We will test if you are root or have sudo permissions"
+# Check if the user is root
+if [ "$Name" = "root" ]; then
+printf "${Green}%s${ResetColor}\n" "'$Name' Is a good account"
+else
+        # If the sudo command is available, check if the user has sudo permissions
+	if command -v sudo &> /dev/null; then
+         	if ! sudo -l; then
+                # If the user doesn't have sudo permissions, print an error message and exit with an error code
+		printf "${Red}%s ${Cyan}%s${ResetColor}\n" "'$Name'" "Is not a sudoers account"
 		printf "${Red}%s${ResetColor}\n" "Please logged in on a root or admin account and restart the script '$0'"
 		exit 1
 		else
-		printf "${Green}%s${ResetColor}\n"  "'$Name' Is a sudoers account"
+                # If the user has sudo permissions, print a success message and prompt the user to switch to the root account
+		printf "${Green}%s ${Cyan}%s${ResetColor}\n"  "'$Name'" "Is a sudoers account"
                 printf "${Yellow}%s${ResetColor}\n" "Please logged in on your root account now, type your 'root' password"
                         if ! sudo -u root "$0"; then
+                        # If the switch to the root account fails, exit with an error code
                         exit 1
                         fi
 		fi
-	else
-		printf "${Green}%s${ResetColor}\n" "'$Name' Is a good account"
+        else
+       	# If the sudo command is not available, print an error message and exit with an error code
+        printf "${Red}%s${ResetColor}\n" "'sudo' command not found. Please install 'sudo' to continue."
+	exit 1
 	fi
+fi
 # if sudo -u root "$0" is launched, this condition exiting properly the first script lauched by user
 if [ "$Name" != "root" ]; then
 exit 0
