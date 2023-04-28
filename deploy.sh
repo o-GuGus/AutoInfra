@@ -93,7 +93,7 @@ fi
 ################################################################################
 # Requests for machine parameters #
 function SetDATA {
-printf "${Red}%s${ResetColor}\n\n"      "Please type answers in lowercase"
+printf "${Red}%s${ResetColor}\n"      "Please type answers in lowercase"
 
 printf "${Red}%s${ResetColor}\n"        "Domain name (ex: domain.tld):"
 read -r var0
@@ -107,11 +107,15 @@ read -r var2
 if [ "$var1" = "ns2" ] || [ "$var1" = "addcp" ] || [ "$var1" = "addcs" ] || [ "$var1" = "file" ] || [[ "$var1" =~ ^user-[$valid] ]]; then
 printf "${Red}%s${ResetColor}\n"        "Primary DNS server (NS1) IP address (ex: 192.168.1.201):"
 read -r var4
+else
+var4="$var2"
 fi
 
 if [ "$var1" = "ns1" ] || [ "$var1" = "addcp" ] || [ "$var1" = "addcs" ] || [ "$var1" = "file" ] || [[ "$var1" =~ ^user-[$valid] ]]; then
 printf "${Red}%s${ResetColor}\n"        "Secondary DNS server (NS2) IP address (ex: 192.168.1.202):"
 read -r var5
+else
+var5="$var2"
 fi
 
 #printf "${Red}%s${ResetColor}\n" "Domain admin login:"
@@ -172,7 +176,7 @@ read -r var20
 fi
 
 # Print all data for verification #
-printf "${Yellow}%s${ResetColor}\n"                     "Please check the following informations:"
+printf "\n${Yellow}%s${ResetColor}\n"                     "Please check the following informations:"
 printf "${Yellow}%s ${Green}%s${ResetColor}\n"          "Domain name:" "$var0"
 printf "${Yellow}%s ${Green}%s${ResetColor}\n"          "Machine name:" "$var1"
 printf "${Yellow}%s ${Green}%s${ResetColor}\n"          "@IP:" "$var2"
@@ -205,29 +209,15 @@ printf "${Yellow}%s${ResetColor}\n"     "Informations is correct ?! (Y/N)"
 read -r info
 
 if [[ "$info" =~ ^[yYoO] ]]; then
-	printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "OK" "Installation starts in 3 seconds"
+	printf "\n${Green}%s ${Cyan}%s${ResetColor}\n\n"    "OK" "Installation starts in 3 seconds"
 	sleep 3
 elif [[ "$info" =~ ^[nN] ]]; then
-	printf "${Red}%s ${Cyan}%s${ResetColor}\n"      "OK" "Go to restart the script '$0'"
+	printf "\n${Red}%s ${Cyan}%s${ResetColor}\n\n"      "OK" "Go to restart the script '$0'"
 	./"$0"
 		else
-                printf "${Red}%s ${Yellow}%s${ResetColor}\n"      "INPUT ERROR" "Go to restart the script '$0'"
+                printf "\n${Red}%s ${Yellow}%s${ResetColor}\n\n"      "INPUT ERROR" "Go to restart the script '$0'"
 	        ./"$0"
 fi
-}
-################################################################################
-
-################################################################################
-# Configuring SSH for root login #
-function ConfSSH {
-apt -y install openssh-server
-systemctl enable ssh
-systemctl start ssh
-cp /etc/ssh/sshd_config /etc/ssh/sshd_config.old
-echo "PermitRootLogin yes" >> /etc/ssh/sshd_config
-systemctl restart ssh
-printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "END OF" "Configuring SSH for root login"
-sleep 3
 }
 ################################################################################
 
@@ -258,7 +248,7 @@ cat <<EOF > ~/.bashrc
 # alias for nano
 alias nn='nano'
 EOF
-printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "END OF" "Configuration of shortcuts (ll & nn)"
+printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "END OF" "Configuring shortcuts (ll & nn)"
 sleep 3
 }
 ################################################################################
@@ -271,6 +261,20 @@ echo "export PATH=/usr/local/sbin:/usr/sbin:/sbin:$PATH" >> ~/.bashrc
 # bashrc reload
 . ~/.bashrc
 printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "END OF" "Configuring the sbin PATH"
+sleep 3
+}
+################################################################################
+
+################################################################################
+# Configuring SSH for root login #
+function ConfSSH {
+apt -y install openssh-server
+systemctl enable ssh
+systemctl start ssh
+cp /etc/ssh/sshd_config /etc/ssh/sshd_config.old
+echo "PermitRootLogin yes" >> /etc/ssh/sshd_config
+systemctl restart ssh
+printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "END OF" "Configuring SSH for root login"
 sleep 3
 }
 ################################################################################
