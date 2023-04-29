@@ -187,7 +187,7 @@ read -r var20
 fi
 
 # Print all data for verification #
-printf "\n${Yellow}%s${ResetColor}\n"                     "Please check the following informations:"
+printf "\n${Yellow}%s${ResetColor}\n"                   "Please check the following informations:"
 printf "${Yellow}%s ${Green}%s${ResetColor}\n"          "Domain name:" "$var0"
 printf "${Yellow}%s ${Green}%s${ResetColor}\n"          "Machine name:" "$var1"
 printf "${Yellow}%s ${Green}%s${ResetColor}\n"          "@IP:" "$var2"
@@ -490,12 +490,12 @@ function ConfBIND9 {
 #     Config for (NS1)    #
 if [ "$var1" = "ns1" ]; then
 ServerIP="$var5"
-printf "${Cyan}%s${ResetColor}\n"       "Start Bind9 configuration for server $ServerIP"
+printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "START" "Bind9 configuration for server NS1 '$ServerIP'"
 fi
 #     Config for (NS2)    #
 if [ "$var1" = "ns2" ]; then
 ServerIP="$var4"
-printf "${Cyan}%s${ResetColor}\n"       "Start Bind9 configuration for server $ServerIP"
+printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "START" "Bind9 configuration for server NS2 '$ServerIP'"
 fi
 
 # install the necessary packages Bind9
@@ -608,7 +608,7 @@ ns1.$var0.          IN      A     $var4
 ns2.$var0.          IN      A     $var5
 addcp.$var0.         IN      A     $var15
 addcs.$var0.          IN      A     $var16
-fichiers.$var0.          IN      A     $var19
+file.$var0.          IN      A     $var19
 ;
 ; global catalog servers
 ;
@@ -659,7 +659,7 @@ ipaddcprev=$(echo "$var15" | awk -F. '{print $4"."$3"."$2"."$1}')
 ##### reversal of the addcs srv ip
 ipaddcsrev=$(echo "$var16" | awk -F. '{print $4"."$3"."$2"."$1}')
 ##### reversal of the ip of the srv files
-ipfichiersrev=$(echo "$var19" | awk -F. '{print $4"."$3"."$2"."$1}')
+ipfilerev=$(echo "$var19" | awk -F. '{print $4"."$3"."$2"."$1}')
 
 ##### /var/lib/bind/$ipcut.rev #####
 cat <<EOF > /var/lib/bind/"$ipcut".rev
@@ -675,7 +675,7 @@ $ipaddcprev.in-addr.arpa.     IN      PTR     addcp.$var0.
 $ipns1rev.in-addr.arpa.      IN      PTR     ns1.$var0.
 $ipns2rev.in-addr.arpa.      IN      PTR     ns2.$var0.
 $ipaddcsrev.in-addr.arpa.      IN      PTR     addcs.$var0.
-$ipfichiersrev.in-addr.arpa.      IN      PTR     fichiers.$var0.
+$ipfilerev.in-addr.arpa.      IN      PTR     file.$var0.
 EOF
 ##### /var/lib/bind/$ipcut.rev #####
 
@@ -688,22 +688,8 @@ sleep 3
 ################################################################################
 
 ################################################################################
-# Server configuration (ADDCP) SAMBA 4 AD DC Primary #
-# OR #
-# Server configuration (ADDCS) SAMBA 4 AD DC Secondary #
-function ConfSAMBA4AD {
-#     Banner for (ADDCP)    #
-if [ "$var1" = "addcp" ]; then
-printf "${Cyan}%s${ResetColor}\n"       "Start Server configuration $var18 SAMBA 4 AD DC Primary"
-fi
-#     Banner for (ADDCS)    #
-if [ "$var1" = "addcs" ]; then
-printf "${Cyan}%s${ResetColor}\n"       "Start Server configuration $var18 SAMBA 4 AD DC Secondary"
-fi
-
-##############
 # /etc/fstab #
-##############
+function ConfFSTAB {
 cp /etc/fstab  /etc/fstab.old
 # get primary partition UUID
 UUID=$(< /etc/fstab grep ext4 | awk -F/ '{print $1}')
@@ -712,22 +698,31 @@ sed -i".bak" '/ext4/d' /etc/fstab
 # creating the line /ext4 primary partition with the new attributes
 echo "$UUID    /    ext4    noatime,nodiratime,user_xattr,acl,errors=remount-ro    0    1" >> /etc/fstab
 printf "${Green}%s ${Cyan}%s${ResetColor}\n"      "END OF" "Configure FSTAB"
+sleep 3
+}
+################################################################################
 
+################################################################################
+# ConfS4 #
+function ConfS4 {
 # important notice
 printf "${Red}%s${ResetColor}\n" "Several windows will appear, just hit 'ENTER' each time"
 sleep 20
 
-# install packages for samba4 4 AD DC
+# install packages for samba4
 apt install -y samba krb5-user krb5-config winbind libpam-winbind libnss-winbind acl
-printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "END OF" "Installation of Samba4 4 AD DC packages"
+printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "END OF" "Installation of Samba4 packages"
+sleep 3
+}
+################################################################################
 
-##################
+################################################################################
 # /etc/krb5.conf #
-##################
+function ConfKRB5 {
 cp /etc/krb5.conf /etc/krb5.conf.old
 cat <<EOF > /etc/krb5.conf
 [libdefaults]
-	default_realm = $var8
+        default_realm = $var8
     dns_lookup_realm = false
     dns_lookup_kdc = true
 
@@ -765,49 +760,29 @@ cat <<EOF > /etc/krb5.conf
 		$var0 = $var8
 EOF
 printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "END OF" "Configuring KERBEROS"
+sleep 3
+}
+################################################################################
 
+################################################################################
+# Server configuration (ADDCP) SAMBA 4 AD DC Primary #
+function ConfSAMBA4_AD_DCP {
+printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "START" "Configuring '$var18' SAMBA 4 AD DC Primary"
 # stop old services
 systemctl stop samba-ad-dc.service smbd.service nmbd.service winbind.service
 systemctl disable samba-ad-dc.service smbd.service nmbd.service winbind.service
-
 # moved old Samba 4 conf file
 mv /etc/samba/smb.conf /etc/samba/smb.conf.old1
-
-###     Config for (ADDCP)    ###
-if [ "$var1" = "addcp" ]; then
 # creation of the samba 4 domain #
 samba-tool domain provision --use-rfc2307 --realm "$var8" --domain "$var7" --server-role dc --dns-backend BIND9_FLATFILE --adminpass "$var17"
 #samba-tool domain provision --use-rfc2307 --realm "$var8" --domain "$var7" --server-role dc --dns-backend SAMBA_INTERNAL --adminpass "$var17"
 #samba-tool domain provision --use-rfc2307 --realm "$var8" --domain "$var7" --server-role dc --dns-backend BIND9_DLZ --adminpass "$var17"
-printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "END OF" "Creation of the domain '$var7'"
-fi
-
-###     Config for (ADDCS)    ###
-if [ "$var1" = "addcs" ]; then
-# Joining the Samba4 AD DC from the ADDCP srv as a secondary domain controller #
-samba-tool domain join "$var0" DC -U "administrator" --password "$var17"
-printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "END OF" "Joigning domain '$var7'"
-fi
-
 # service management
 systemctl unmask samba-ad-dc.service
 systemctl enable samba-ad-dc.service
 systemctl start samba-ad-dc.service
-
-# information about Domain
-printf "${Cyan}%s\n${Yellow}"      "Here is the informations about your SAMBA 4 AD DC domain: "
-samba-tool domain level show
-printf "%s${ResetColor}\n"
-
-# information about Kerberos
-echo "$var17" | kinit administrator@"$var8"
-printf "${Cyan}%s\n${Yellow}"       "Here is your Kerberos informations: "
-klist
-printf "%s${ResetColor}\n"
-
-#######################
-# /etc/samba/smb.conf #
-#######################
+printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "END OF" "Creation of the domain '$var7'"
+# /etc/samba/smb.conf
 cp /etc/samba/smb.conf /etc/samba/smb.conf.old2
 cat <<EOF > /etc/samba/smb.conf
 # Global parameters
@@ -866,19 +841,260 @@ ntlm auth = mschapv2-and-ntlmv2-only
         path = /var/lib/samba/sysvol
         read only = No
 EOF
-
-# reboot service samba 4 ad dc
+# reboot services
 systemctl restart samba-ad-dc.service
-printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "END OF" "Configuring '/etc/samba/smb.conf'"
+printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "END OF" "Configuring SAMBA 4 AD DC Primary '/etc/samba/smb.conf'"
+sleep 3
+}
+################################################################################
 
-####################
+################################################################################
+# Server configuration (ADDCS) SAMBA 4 AD DC Secondary #
+function ConfSAMBA4_AD_DCS {
+printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "START" "Configuring '$var18' SAMBA 4 AD DC Secondary"
+# stop old services
+systemctl stop samba-ad-dc.service smbd.service nmbd.service winbind.service
+systemctl disable samba-ad-dc.service smbd.service nmbd.service winbind.service
+# moved old Samba 4 conf file
+mv /etc/samba/smb.conf /etc/samba/smb.conf.old1
+# Joining the Samba4 AD DC from the ADDCP srv as a secondary domain controller #
+samba-tool domain join "$var0" DC -U "administrator" --password "$var17"
+# service management
+systemctl unmask samba-ad-dc.service
+systemctl enable samba-ad-dc.service
+systemctl start samba-ad-dc.service
+printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "END OF" "Joigning domain '$var7'"
+# /etc/samba/smb.conf
+cp /etc/samba/smb.conf /etc/samba/smb.conf.old2
+cat <<EOF > /etc/samba/smb.conf
+# Global parameters
+[global]
+    netbios name = $var18
+    workgroup = $var7
+    realm = $var8
+    server role = active directory domain controller
+    idmap_ldb:use rfc2307 = yes
+      dns forwarder = $var4,$var5
+
+# logs
+log file = /var/log/samba/%m.log
+log level = 1
+
+# acl
+vfs objects = acl_xattr
+map acl inherit = yes
+store dos attributes = yes
+
+# template homedir & shell
+template homedir = /home/%D/%U
+template shell = /bin/bash
+
+# winbind
+winbind use default domain = yes
+winbind offline logon = false
+winbind nss info = rfc2307
+winbind enum users = yes
+winbind enum groups = yes
+
+# Desactiver les connections null session
+restrict anonymous = 2
+
+# Desactiver NetBIOS
+disable netbios = yes
+
+# Desactiver le support des imprimantes
+printcap name = /dev/null
+load printers = no
+disable spoolss = yes
+printing = bsd
+
+# Generer des hashes de mot de passe supplementaires
+password hash userPassword schemes = CryptSHA256 CryptSHA512
+
+# Desactiver NTLMv1
+ntlm auth = mschapv2-and-ntlmv2-only
+
+# dossiers
+    [netlogon]
+        path = /var/lib/samba/sysvol/$var0/scripts
+        read only = No
+
+    [sysvol]
+        path = /var/lib/samba/sysvol
+        read only = No
+EOF
+# reboot services
+systemctl restart samba-ad-dc.service
+printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "END OF" "Configuring SAMBA 4 AD DC Secondary '/etc/samba/smb.conf'"
+sleep 3
+}
+
+################################################################################
+# Server configuration (FILE) SERVER for SAMBA 4 #
+function ConfSAMBA4_FILE_SRV {
+printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "START" "Configuring '$var18' FILE SERVER"
+# Creation d'un répertoire de partage commun sur Samba4
+mkdir /"$var11"
+chmod -R 775 /"$var11"
+chown -R root:"domain users" /"$var11"
+printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "END OF" "Creation du dossier de partage '$var11' sur Samba4"
+# /etc/samba/smb.conf
+cp /etc/samba/smb.conf /etc/samba/smb.conf.old1
+cat <<EOF > /etc/samba/smb.conf
+# Global parameters
+[global]
+  netbios name = $var18
+  workgroup = $var7
+  realm = $var8
+  security = ADS
+    dns forwarder = $var4,$var5
+
+  # idmap config
+  idmap config * : backend = tdb
+  idmap config * : range = 50000-1000000
+
+# logs
+log file = /var/log/samba/%m.log
+log level = 1
+
+# acl
+vfs objects = acl_xattr
+map acl inherit = yes
+store dos attributes = yes
+
+# template homedir & shell
+template homedir = /home/%D/%U
+template shell = /bin/bash
+
+# winbind
+winbind use default domain = yes
+winbind offline logon = false
+winbind nss info = rfc2307
+winbind enum users = yes
+winbind enum groups = yes
+
+  # Desactiver les connections null session
+  restrict anonymous = 2
+
+  # Desactiver NetBIOS
+  disable netbios = yes
+
+  # Desactiver le support des imprimantes
+  printcap name = /dev/null
+  load printers = no
+  disable spoolss = yes
+  printing = bsd
+
+  # Generer des hashes de mot de passe supplementaires
+  password hash userPassword schemes = CryptSHA256 CryptSHA512
+
+  # Desactiver NTLMv1
+  ntlm auth = mschapv2-and-ntlmv2-only
+
+    # kerberos
+    dedicated keytab file = /etc/krb5.keytab
+    kerberos method = secrets and keytab
+
+    # username map
+    username map = /etc/samba/user.map
+
+  # Rendre les file executables
+  acl allow execute always = yes
+
+# folders
+    [netlogon]
+      path = /var/lib/samba/sysvol/$var0/scripts
+      read only = No
+
+    [sysvol]
+      path = /var/lib/samba/sysvol
+      read only = No
+# common folder
+      [$var11]
+	path = /$var11
+	read only = no
+EOF
+printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "END OF" "Configuring FILE SERVER '/etc/samba/smb.conf'"
+# mapper l'administrateur de domaine sur le compte root local
+cat <<EOF > /etc/samba/user.map
+!root = $var7\administrator
+EOF
+# reboot de samba 4
+smbcontrol all reload-config
+# Gestion des services
+systemctl mask samba-ad-dc.service
+systemctl stop samba-ad-dc.service
+systemctl unmask smbd nmbd winbind
+systemctl enable smbd nmbd winbind
+# Jonction de la machine au domaine
+net ads join -U administrator%"$var17"
+# restart services
+systemctl restart smbd nmbd winbind
+printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "END OF" "Joigning domain '$var7'"
+sleep 3
+}
+################################################################################
+
+################################################################################
+# User configuration for SAMBA 4 #
+function ConfSAMBA4_USER {
+printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "START" "Configuring '$var18' USER on SAMBA 4"
+# /etc/samba/smb.conf
+cp /etc/samba/smb.conf /etc/samba/smb.conf.old1
+cat <<EOF > /etc/samba/smb.conf
+# Global parameters
+[global]
+  netbios name = $var18
+  workgroup = $var7
+  realm = $var8
+  security = ADS
+    dns forwarder = $var4,$var5
+
+  # idmap config
+  idmap config * : backend = tdb
+  idmap config * : range = 50000-1000000
+
+# logs
+log file = /var/log/samba/%m.log
+log level = 1
+
+# acl
+vfs objects = acl_xattr
+map acl inherit = yes
+store dos attributes = yes
+
+# template homedir & shell
+template homedir = /home/%D/%U
+template shell = /bin/bash
+
+# winbind
+winbind use default domain = yes
+winbind offline logon = false
+winbind nss info = rfc2307
+winbind enum users = yes
+winbind enum groups = yes
+EOF
+# reboot de samba 4
+smbcontrol all reload-config
+# Gestion des services
+systemctl mask samba-ad-dc.service
+systemctl stop samba-ad-dc.service
+systemctl mask smbd nmbd
+systemctl stop smbd nmbd
+systemctl unmask winbind
+systemctl enable winbind
+printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "END OF" "Configuring SAMBA 4 USER '/etc/samba/smb.conf'"
+# Jonction de la machine au domaine
+net ads join -U administrator%"$var17"
+printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "END OF" "Joigning domain '$var7'"
+# restart services
+systemctl restart winbind
+}
+################################################################################
+
+################################################################################
 # NSS login system #
-####################
-
-# creer un repertoire personnel lors de la connexion
-pam-auth-update --enable mkhomedir
-printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "END OF" "Home directory has connection"
-
+function ConfNSS {
 # pour pouvoir authentifier et ouvrir une session ad sur le systeme local
 cp /etc/nsswitch.conf /etc/nsswitch.conf.old
 cat <<EOF > /etc/nsswitch.conf
@@ -904,7 +1120,17 @@ rpc:            db files
 netgroup:       nis
 EOF
 printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "END OF" "Configuring NSS"
+sleep 3
+}
+################################################################################
 
+################################################################################
+# PAM login system #
+function ConfPAM {
+# creer un repertoire personnel lors de la connexion
+pam-auth-update --enable mkhomedir
+echo "session    required    pam_mkhomedir.so    skel=/etc/skel/    umask=0022" >> /etc/pam.d/common-account
+printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "END OF" "PAM home directory has connection"
 # suppression de "try_authtok"
 # les utilisateurs authentifies localement sur linux ne peuvent pas modifier leur mot de passe depuis la console
 cp /etc/pam.d/common-password /etc/pam.d/common-password.old
@@ -950,39 +1176,43 @@ password        required                        pam_permit.so
 # and here are more per-package modules (the "Additional" block)
 # end of pam-auth-update config
 EOF
-printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "END OF" "Remove try_authtok"
+printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "END OF" "PAM remove 'try_authtok'"
+sleep 3
+}
+################################################################################
 
-# les binaires Samba4 sont livres avec un demon winbind integre et active par defaut
-# desactivation du demon winbind fourni par le package winbind a partir des referentiels debian officiels
-systemctl disable winbind.service
-systemctl stop winbind.service
+################################################################################
+# INFORMATIONS FOR SAMBA 4 AD #
+function ADinfo {
+# information about domain
+printf "${Cyan}%s\n${Yellow}"           "Here is the informations about your SAMBA 4 AD DC domain: "
+samba-tool domain level show
 printf "%s${ResetColor}\n\n"
-
-printf "${Cyan}%s\n${Yellow}"           "Here is the information of the groups currently present on the domain :"
-wbinfo -g
-printf "%s${ResetColor}\n\n"
-
-printf "${Cyan}%s\n${Yellow}"           "Here is the list of users currently present on the domain :"
-wbinfo -u
-getent passwd | grep "$var7"
-printf "%s${ResetColor}\n\n"
-
+# information about password setting
 printf "${Cyan}%s\n${Yellow}"           "Here are the password settings for your domain :"
 samba-tool domain passwordsettings show
 printf "%s${ResetColor}\n\n"
 sleep 3
+}
+################################################################################
 
-#     Config for (ADDCP)    #
-if [ "$var1" = "addcp" ]; then
-printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "END OF" "Configuring SAMBA 4 AD DC Primary"
+################################################################################
+function Globalinfo {
+# information about Kerberos
+echo "$var17" | kinit administrator@"$var8"
+printf "${Cyan}%s\n${Yellow}"           "Here is your Kerberos informations: "
+klist
+printf "%s${ResetColor}\n\n"
+#
+printf "${Cyan}%s\n${Yellow}"           "Here is the information of the groups currently present on the domain :"
+wbinfo -g
+printf "%s${ResetColor}\n\n"
+#
+printf "${Cyan}%s\n${Yellow}"           "Here is the list of users currently present on the domain :"
+wbinfo -u
+getent passwd | grep "$var7"
+printf "%s${ResetColor}\n\n"
 sleep 3
-fi
-
-#     Config for (ADDCS)    #
-if [ "$var1" = "addcs" ]; then
-printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "END OF" "Configuring SAMBA 4 AD DC Secondary"
-sleep 3
-fi
 }
 ################################################################################
 
@@ -1024,6 +1254,90 @@ cronjob2="*/5 * * * * $croncmd2"
 printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "END OF" "Configuring SysVol Replication 'CLIENT'"
 sleep 3
 fi
+}
+################################################################################
+
+################################################################################
+# Acceder au volume partage commun Samba a partir des clients Linux  #
+function ConfCOMMON {
+# installation des paquets
+apt install -y smbclient cifs-utils
+
+# les infos du serveur de partage de file
+printf "${Cyan}%s\n${Yellow}"           "Here is the file sharing server info :"
+smbclient -L \file -U administrator%"$var17"
+printf "%s${ResetColor}\n\n"
+
+# creation des dossiers et droits
+mkdir /mnt/"$var11"
+chmod 2770 /mnt/"$var11"
+chown root:"domain users" /mnt/"$var11"
+# 
+mkdir /root/.samba
+echo "username=administrator
+password=$var17" > /root/.samba/"$var11"_pass
+chmod 600 /root/.samba/"$var11"_pass
+
+# fstab insertion
+cp /etc/fstab  /etc/fstab.old2
+echo "//file/$var11   /mnt/$var11   cifs   auto,x-systemd.automount,credentials=/root/.samba/""$var11""_pass,iocharset=utf8,file_mode=0770,dir_mode=0770,gid=50003   0   0" >> /etc/fstab
+printf "${Green}%s ${Cyan}%s${ResetColor}\n" "END OF" "Creation of folders and rights & fstab automount"
+
+# creation du raccourcis partage smb "common" sur le Bureau pour chaque utilisateur & application des droits
+# french version
+mkdir /etc/skel/Bureau
+ln -s /mnt/"$var11" /etc/skel/Bureau/"$var11"
+chmod 2770 /etc/skel/Bureau/"$var11"
+chown root:"domain users" /etc/skel/Bureau/"$var11"
+# english version
+mkdir /etc/skel/Desktop
+ln -s /mnt/"$var11" /etc/skel/Desktop/"$var11"
+chmod 2770 /etc/skel/Desktop/"$var11"
+chown root:"domain users" /etc/skel/Desktop/"$var11"
+printf "${Green}%s ${Cyan}%s${ResetColor}\n" "END OF" "Acceder au partage SMB '$var11' a partir du bureau"
+sleep 3
+}
+################################################################################
+
+################################################################################
+# Installation d'un environnement graphique #
+function ConfENVGra {
+# menu
+printf "${Red}%s${ResetColor}\n"                                "Which graphical environment do you want to install :"
+printf "${Yellow}%-4s ${Cyan}%-20s %s${ResetColor}\n"           "1)" "KDE Plasma"
+printf "${Yellow}%-4s ${Cyan}%-20s %s${ResetColor}\n"           "2)" "GNOME"
+printf "${Yellow}%-4s ${Cyan}%-20s %s${ResetColor}\n"           "3)" "Xfce"
+printf "${Yellow}%-4s ${Cyan}%-20s %s${ResetColor}\n"           "n)" "I don't want a graphical environment"
+read -r envgra
+case $envgra in
+#
+1)
+printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "START" "Configuring KDE Plasma environment"
+sleep 2
+apt install -y kde-plasma-desktop
+printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "END OF" "Configuring KDE Plasma environment"
+;;
+#
+2)
+printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "START" "Configuring GNOME environment"
+sleep 2
+apt install -y gnome
+printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "END OF" "Configuring GNOME environment"
+;;
+#
+3)
+printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "START" "Configuring XFCE environment"
+sleep 2
+apt install -y xfce4
+printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "END OF" "Configuring XFCE environment"
+;;
+#
+*)
+printf "${Green}%s${ResetColor}\n"  "No graphical environment"
+sleep 2
+;;
+esac
+sleep 3
 }
 ################################################################################
 
@@ -1090,49 +1404,6 @@ sleep 3
 ################################################################################
 
 
-
-
-
-
-################################################################################
-function ConfFILEServer {
-echo "a faire"
-}
-################################################################################
-
-
-################################################################################
-function ConfDIRECTORYCommon {
-echo "a faire"
-}
-################################################################################
-
-
-################################################################################
-function JoinDOMAIN {
-echo "a faire"
-}
-################################################################################
-
-
-################################################################################
-function JoinFILE {
-echo "a faire"
-}
-
-################################################################################
-
-################################################################################
-function ConfENVGra {
-echo "a faire"
-}
-################################################################################
-
-################################################################################
-function ConfCOMMON {
-echo "a faire"
-}
-################################################################################
 
 
 
@@ -1222,7 +1493,7 @@ HowTo
 ############################################
 # menu that prompts the user to choose     #
 # which server or user they want to deploy #
-printf "${Yellow}%s${ResetColor}\n"                             "Which server/user do you want to deploy:"
+printf "${Red}%s${ResetColor}\n"                                "Which server/user do you want to deploy :"
 printf "${Yellow}%-4s ${Cyan}%-20s %s${ResetColor}\n"           "1)" "Name serveur one" "(NS1)"
 printf "${Yellow}%-4s ${Cyan}%-20s %s${ResetColor}\n"           "2)" "Name serveur two" "(NS2)"
 printf "${Yellow}%-4s ${Cyan}%-20s %s${ResetColor}\n"           "3)" "Primary AD server" "(ADDCP)"
@@ -1297,8 +1568,20 @@ ConfSOURCES
 GoUPDATES
 ConfSSL
 ConfWEBMIN
-ConfSAMBA4AD
+#
+ConfFSTAB
+ConfS4
+ConfKRB5
+#
+ConfSAMBA4_AD_DCP
+#
+ConfNSS
+ConfPAM
+#
+ADinfo
+Globalinfo
 ConfRSYNCSysVol
+#
 ConfNTPServer
 GoReboot
 ;;
@@ -1321,7 +1604,18 @@ ConfSOURCES
 GoUPDATES
 ConfSSL
 ConfWEBMIN
-ConfSAMBA4AD
+#
+ConfFSTAB
+ConfS4
+ConfKRB5
+#
+ConfSAMBA4_AD_DCS
+#
+ConfNSS
+ConfPAM
+#
+ADinfo
+Globalinfo
 ConfRSYNCSysVol
 ConfNTPClient
 GoReboot
@@ -1345,8 +1639,17 @@ ConfSOURCES
 GoUPDATES
 ConfSSL
 ConfWEBMIN
-ConfFILEServer
-ConfDIRECTORYCommon
+#
+ConfFSTAB
+ConfS4
+ConfKRB5
+#
+ConfSAMBA4_FILE_SRV
+#
+ConfNSS
+ConfPAM
+#
+Globalinfo
 ConfNTPClient
 GoReboot
 ;;
@@ -1376,10 +1679,19 @@ ConfHOSTNAME
 ConfSOURCES
 GoUPDATES
 # Specifics functions for this machine
-JoinDOMAIN
-JoinFILE
-ConfENVGra
+#
+ConfFSTAB
+ConfS4
+ConfKRB5
+#
+ConfSAMBA4_USER
+#
+ConfNSS
+ConfPAM
+#
+Globalinfo
 ConfCOMMON
+ConfENVGra
 ConfNTPClient
 GoReboot
 ;;
