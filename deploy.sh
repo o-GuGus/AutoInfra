@@ -490,12 +490,12 @@ function ConfBIND9 {
 #     Config for (NS1)    #
 if [ "$var1" = "ns1" ]; then
 ServerIP="$var5"
-printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "START" "Bind9 configuration for server NS1 '$ServerIP'"
+printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "START" "Bind9 configuration for server NS1"
 fi
 #     Config for (NS2)    #
 if [ "$var1" = "ns2" ]; then
 ServerIP="$var4"
-printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "START" "Bind9 configuration for server NS2 '$ServerIP'"
+printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "START" "Bind9 configuration for server NS2"
 fi
 
 # install the necessary packages Bind9
