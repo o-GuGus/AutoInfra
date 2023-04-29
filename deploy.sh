@@ -135,6 +135,9 @@ fi
 # netbios domain name #
 var7=$(echo "$var0" |cut -d. -f 1 | tr "[:lower:]" "[:upper:]")
 
+# uppercase hostname #
+var18=$(echo "$var1" | tr "[:lower:]" "[:upper:]")
+
 # uppercase domain name #
 var8=$(echo "$var0" | tr "[:lower:]" "[:upper:]")
 
@@ -143,20 +146,6 @@ var8=$(echo "$var0" | tr "[:lower:]" "[:upper:]")
 
 #printf "${Red}%s${ResetColor}\n" "Domain user group name:"
 #read -r var10
-
-if [ "$var1" = "file" ] || [[ "$var1" =~ ^user-[$valid] ]]; then
-printf "${Red}%s${ResetColor}\n"        "SMB common share folder name:"
-read -r var11
-fi
-
-printf "${Red}%s${ResetColor}\n"        "Subnet mask (ex: 255.255.255.0):"
-read -r var12
-
-printf "${Red}%s${ResetColor}\n"        "Network gateway (ex: 192.168.1.1):"
-read -r var13
-
-printf "${Red}%s${ResetColor}\n"        "Ethernet interface (ex: eth0 or ens192):"
-read -r var14
 
 if [ "$var1" = "ns1" ] || [ "$var1" = "ns2" ] || [ "$var1" = "addcs" ] || [ "$var1" = "file" ] || [[ "$var1" =~ ^user-[$valid] ]]; then
 printf "${Red}%s${ResetColor}\n"        "Primary AD server (ADDCP) IP address (ex: 192.168.1.203)"
@@ -168,47 +157,58 @@ printf "${Red}%s${ResetColor}\n"        "Secondary AD server (ADDCS) IP address 
 read -r var16
 fi
 
-if [ "$var1" = "addcp" ] || [ "$var1" = "addcs" ] || [ "$var1" = "file" ] || [[ "$var1" =~ ^user-[$valid] ]]; then
-printf "${Red}%s${ResetColor}\n"        "Password [administrator] kerberos 'uppercase, lowercase, number, symbol':"
-read -r var17
-fi
-
-# uppercase hostname #
-var18=$(echo "$var1" | tr "[:lower:]" "[:upper:]")
-
 if [ "$var1" = "ns1" ] || [ "$var1" = "ns2" ]; then
 printf "${Red}%s${ResetColor}\n"        "IP address of the FILE server (ex: 192.168.1.205):"
 read -r var19
 fi
 
+printf "${Red}%s${ResetColor}\n"        "Ethernet interface (ex: eth0 or ens192):"
+read -r var14
+
+printf "${Red}%s${ResetColor}\n"        "Subnet mask (ex: 255.255.255.0):"
+read -r var12
+
+printf "${Red}%s${ResetColor}\n"        "Network gateway (ex: 192.168.1.1):"
+read -r var13
+
+if [ "$var1" = "file" ] || [[ "$var1" =~ ^user-[$valid] ]]; then
+printf "${Red}%s${ResetColor}\n"        "SMB common share folder name:"
+read -r var11
+fi
+
+if [ "$var1" = "addcp" ] || [ "$var1" = "addcs" ] || [ "$var1" = "file" ] || [[ "$var1" =~ ^user-[$valid] ]]; then
+printf "${Red}%s${ResetColor}\n"        "Password [administrator] kerberos 'uppercase, lowercase, number, symbol':"
+read -r var17
+fi
+
 if [ "$var1" = "addcs" ] || [ "$var1" = "file" ]; then
-printf "${Red}%s${ResetColor}\n"        "Password [root] for server 'ADDCP':"
+printf "${Red}%s${ResetColor}\n"        "Password [root] of ADDCS server for 'SysVol replication':"
 read -r var20
 fi
 
 # Print all data for verification #
 printf "\n${Yellow}%s${ResetColor}\n"                   "Please check the following informations:"
 printf "${Yellow}%s ${Green}%s${ResetColor}\n"          "Domain name:" "$var0"
+printf "${Yellow}%s ${Green}%s${ResetColor}\n"          "Domain uppercase:" "$var8"
+printf "${Yellow}%s ${Green}%s${ResetColor}\n"          "NETBIOS name:" "$var7"
 printf "${Yellow}%s ${Green}%s${ResetColor}\n"          "Machine name:" "$var1"
+printf "${Yellow}%s ${Green}%s${ResetColor}\n"          "Hostname uppercase:" "$var18"
 printf "${Yellow}%s ${Green}%s${ResetColor}\n"          "@IP:" "$var2"
-# printf "${Yellow}%s ${Green}%s${ResetColor}\n"        "AD server name:" "$var3"
 printf "${Yellow}%s ${Green}%s${ResetColor}\n"          "@Primary DNS IP:" "$var4"
 printf "${Yellow}%s ${Green}%s${ResetColor}\n"          "@Secondary DNS IP:" "$var5"
-# printf "${Yellow}%s ${Green}%s${ResetColor}\n"        "Domain admin login:" "$var6"
-printf "${Yellow}%s ${Green}%s${ResetColor}\n"          "NETBIOS name:" "$var7"
-printf "${Yellow}%s ${Green}%s${ResetColor}\n"          "Domain uppercase:" "$var8"
-# printf "${Yellow}%s ${Green}%s${ResetColor}\n"        "Samba server description:" "$var9"
-# printf "${Yellow}%s ${Green}%s${ResetColor}\n"        "Domain user group name:" "$var10"
-printf "${Yellow}%s ${Green}%s${ResetColor}\n"          "SMB common share folder name:" "$var11"
-printf "${Yellow}%s ${Green}%s${ResetColor}\n"          "Subnet mask:" "$var12"
-printf "${Yellow}%s ${Green}%s${ResetColor}\n"          "Network Gateway:" "$var13"
-printf "${Yellow}%s ${Green}%s${ResetColor}\n"          "Ethernet interface:" "$var14"
 printf "${Yellow}%s ${Green}%s${ResetColor}\n"          "ADDCP srv IP address:" "$var15"
 printf "${Yellow}%s ${Green}%s${ResetColor}\n"          "ADDCS srv IP address:" "$var16"
-printf "${Yellow}%s ${Green}%s${ResetColor}\n"          "Administrator password:" "$var17"
-printf "${Yellow}%s ${Green}%s${ResetColor}\n"          "Hostname uppercase:" "$var18"
 printf "${Yellow}%s ${Green}%s${ResetColor}\n"          "File srv IP address:" "$var19"
-printf "${Yellow}%s ${Green}%s${ResetColor}\n\n"        "ADDCP root password:" "$var20"
+# printf "${Yellow}%s ${Green}%s${ResetColor}\n"        "AD server name:" "$var3"
+# printf "${Yellow}%s ${Green}%s${ResetColor}\n"        "Domain admin login:" "$var6"
+# printf "${Yellow}%s ${Green}%s${ResetColor}\n"        "Samba server description:" "$var9"
+# printf "${Yellow}%s ${Green}%s${ResetColor}\n"        "Domain user group name:" "$var10"
+printf "${Yellow}%s ${Green}%s${ResetColor}\n"          "Ethernet interface:" "$var14"
+printf "${Yellow}%s ${Green}%s${ResetColor}\n"          "Subnet mask:" "$var12"
+printf "${Yellow}%s ${Green}%s${ResetColor}\n"          "Network Gateway:" "$var13"
+printf "${Yellow}%s ${Green}%s${ResetColor}\n"          "SMB common share folder name:" "$var11"
+printf "${Yellow}%s ${Green}%s${ResetColor}\n"          "Administrator password:" "$var17"
+printf "${Yellow}%s ${Green}%s${ResetColor}\n\n"        "SysVol replication password:" "$var20"
 
 # Export all variables for functions, from 0 to 20
 for i in {0..20}; do
@@ -1402,12 +1402,6 @@ printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "END OF" "NTP 'SERVER' configura
 sleep 3
 }
 ################################################################################
-
-
-
-
-
-
 
 ################################################################################
 # Configuration du Client NTP #
