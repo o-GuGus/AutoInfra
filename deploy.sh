@@ -1027,6 +1027,7 @@ printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "END OF" "Joigning domain '$var7
 # restart services
 systemctl restart smbd nmbd winbind
 # Creation d'un répertoire de partage commun sur Samba4
+echo "$var17" | kinit administrator@"$var8"
 mkdir /"$var11"
 chmod -R 775 /"$var11"
 chown -R root:"domain users" /"$var11"
