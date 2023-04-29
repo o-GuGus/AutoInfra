@@ -932,7 +932,7 @@ sleep 3
 ################################################################################
 # Server configuration (FILE) SERVER for SAMBA 4 #
 function ConfSAMBA4_FILE_SRV {
-printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "START" "Configuring '$var18' FILE SERVER"
+printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "START" "Configuring '$var18' SERVER"
 # /etc/samba/smb.conf
 cp /etc/samba/smb.conf /etc/samba/smb.conf.old1
 cat <<EOF > /etc/samba/smb.conf
