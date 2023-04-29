@@ -933,11 +933,6 @@ sleep 3
 # Server configuration (FILE) SERVER for SAMBA 4 #
 function ConfSAMBA4_FILE_SRV {
 printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "START" "Configuring '$var18' FILE SERVER"
-# Creation d'un répertoire de partage commun sur Samba4
-mkdir /"$var11"
-chmod -R 775 /"$var11"
-chown -R root:"domain users" /"$var11"
-printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "END OF" "Creation du dossier de partage '$var11' sur Samba4"
 # /etc/samba/smb.conf
 cp /etc/samba/smb.conf /etc/samba/smb.conf.old1
 cat <<EOF > /etc/samba/smb.conf
@@ -1028,6 +1023,11 @@ systemctl unmask smbd nmbd winbind
 systemctl enable smbd nmbd winbind
 # Jonction de la machine au domaine
 net ads join -U administrator%"$var17"
+# Creation d'un répertoire de partage commun sur Samba4
+mkdir /"$var11"
+chmod -R 775 /"$var11"
+chown -R root:"domain users" /"$var11"
+printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "END OF" "Creation du dossier de partage '$var11' sur Samba4"
 # restart services
 systemctl restart smbd nmbd winbind
 printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "END OF" "Joigning domain '$var7'"
@@ -1187,11 +1187,11 @@ function ADinfo {
 # information about domain
 printf "${Cyan}%s\n${Yellow}"           "Here is the informations about your SAMBA 4 AD DC domain: "
 samba-tool domain level show
-printf "%s${ResetColor}\n\n"
+printf "%s${ResetColor}\n"
 # information about password setting
 printf "${Cyan}%s\n${Yellow}"           "Here are the password settings for your domain :"
 samba-tool domain passwordsettings show
-printf "%s${ResetColor}\n\n"
+printf "%s${ResetColor}\n"
 sleep 3
 }
 ################################################################################
@@ -1202,16 +1202,16 @@ function Globalinfo {
 echo "$var17" | kinit administrator@"$var8"
 printf "${Cyan}%s\n${Yellow}"           "Here is your Kerberos informations: "
 klist
-printf "%s${ResetColor}\n\n"
+printf "%s${ResetColor}\n"
 #
 printf "${Cyan}%s\n${Yellow}"           "Here is the information of the groups currently present on the domain :"
 wbinfo -g
-printf "%s${ResetColor}\n\n"
+printf "%s${ResetColor}\n"
 #
 printf "${Cyan}%s\n${Yellow}"           "Here is the list of users currently present on the domain :"
 wbinfo -u
 getent passwd | grep "$var7"
-printf "%s${ResetColor}\n\n"
+printf "%s${ResetColor}\n"
 sleep 3
 }
 ################################################################################
