@@ -1023,14 +1023,14 @@ systemctl unmask smbd nmbd winbind
 systemctl enable smbd nmbd winbind
 # Jonction de la machine au domaine
 net ads join -U administrator%"$var17"
+printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "END OF" "Joigning domain '$var7'"
+# restart services
+systemctl restart smbd nmbd winbind
 # Creation d'un répertoire de partage commun sur Samba4
 mkdir /"$var11"
 chmod -R 775 /"$var11"
 chown -R root:"domain users" /"$var11"
 printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "END OF" "Creation du dossier de partage '$var11' sur Samba4"
-# restart services
-systemctl restart smbd nmbd winbind
-printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "END OF" "Joigning domain '$var7'"
 sleep 3
 }
 ################################################################################
