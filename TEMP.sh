@@ -11,7 +11,7 @@ acl allow execute always = yes
 
 
 # test connexion
-smbclient -L domain.tld -U% #ok
+smbclient -L domain.tld -U user #ok
 smbclient //file.domain.tld/common -U user #ok
 systemctl restart samba-ad-dc.service
 
