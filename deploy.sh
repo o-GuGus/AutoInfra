@@ -1004,10 +1004,14 @@ winbind enum groups = yes
     [sysvol]
       path = /var/lib/samba/sysvol
       read only = No
+
 # common folder
       [$var11]
-	path = /$var11
+	path = /srv/samba/$var11/
 	read only = no
+        inherit acls = yes
+        valid users = +$var7\"Domain Users"
+        invalid users = $var7\example_user
 EOF
 printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "END OF" "Configuring FILE SERVER '/etc/samba/smb.conf'"
 # mapper l'administrateur de domaine sur le compte root local
@@ -1213,10 +1217,24 @@ sleep 3
 
 function ConfCommon {
 # Creation d'un répertoire de partage commun sur Samba4
-mkdir /"$var11"
-chmod -R 775 /"$var11"
-chown -R root:"domain users" /"$var11"
+mkdir -p /srv/samba/"$var11"/
+chmod 2770 /srv/samba/"$var11"/
+chown root:"Domain Users" /srv/samba/"$var11"/
+# Reload Samba
+smbcontrol all reload-config
+# Disable auto-granting permissions for the primary group of user accounts
+setfacl -m group::--- /srv/samba/"$var11"/
+setfacl -m default:group::--- /srv/samba/"$var11"/
+# Set the permissions on the directory
+setfacl -m group:"$var7\Domain Admins":rwx /srv/samba/"$var11"/
+setfacl -m group:"$var7\Domain Users":rwx /srv/samba/"$var11"/
+setfacl -R -m other::--- /srv/samba/"$var11"/
+# Set the same permissions set in the previous step are inherited to new file system objects created in this directory
+setfacl -m default:group:"$var7\Domain Admins":rwx /srv/samba/"$var11"/
+setfacl -m default:group:"$var7\Domain Users":rwx /srv/samba/"$var11"/
+setfacl -m default:other::--- /srv/samba/"$var11"/
 printf "${Green}%s ${Cyan}%s${ResetColor}\n"    "END OF" "Creation du dossier de partage '$var11' sur Samba4"
+sleep 3
 }
 
 ################################################################################
@@ -1266,15 +1284,17 @@ function ConfCOMMON {
 # installation des paquets
 apt install -y smbclient cifs-utils
 
-# les infos du serveur de partage de file
-printf "${Cyan}%s\n${Yellow}"           "Here is the file sharing server info :"
-smbclient -L \file -U administrator%"$var17"
-printf "%s${ResetColor}\n\n"
+# debug and infos
+#printf "${Cyan}%s\n${Yellow}"           "Here is the file sharing server info :"
+#smbclient -L \file -U administrator%"$var17"
+#smbclient -L file -U administrator%"$var17"
+#smbclient //file/srv/samba/$var11 -U administrator%"$var17"
+#printf "%s${ResetColor}\n\n"
 
 # creation des dossiers et droits
 mkdir /mnt/"$var11"
 chmod 2770 /mnt/"$var11"
-chown root:"domain users" /mnt/"$var11"
+chown root:"Domain Users" /mnt/"$var11"
 # 
 mkdir /root/.samba
 echo "username=administrator
@@ -1291,12 +1311,12 @@ printf "${Green}%s ${Cyan}%s${ResetColor}\n" "END OF" "Creation of folders and r
 mkdir /etc/skel/Bureau
 ln -s /mnt/"$var11" /etc/skel/Bureau/"$var11"
 chmod 2770 /etc/skel/Bureau/"$var11"
-chown root:"domain users" /etc/skel/Bureau/"$var11"
+chown root:"Domain Users" /etc/skel/Bureau/"$var11"
 # english version
 mkdir /etc/skel/Desktop
 ln -s /mnt/"$var11" /etc/skel/Desktop/"$var11"
 chmod 2770 /etc/skel/Desktop/"$var11"
-chown root:"domain users" /etc/skel/Desktop/"$var11"
+chown root:"Domain Users" /etc/skel/Desktop/"$var11"
 printf "${Green}%s ${Cyan}%s${ResetColor}\n" "END OF" "Acceder au partage SMB '$var11' a partir du bureau"
 sleep 3
 }
